@@ -3,9 +3,9 @@ import './Organizer.css'
 function Footer() {
     return(
         <>
-            <div className="footer">
+            <footer className="footer">
                 <div></div>
-            </div> Or        
+            </footer>  
         </>
     )
 }
