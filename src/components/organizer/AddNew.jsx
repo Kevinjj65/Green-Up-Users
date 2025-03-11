@@ -6,7 +6,7 @@ function AddNew() {
         <>
             <div className='container'>
                 <main>
-                    <h1>Organize Now</h1>
+                    <h1>Be an Organizer Now</h1>
                     <input className='input name' type='text' placeholder='Name of the Event' />
                     <input className='input date' type='date' placeholder='Date' />
                     <div className='time'>

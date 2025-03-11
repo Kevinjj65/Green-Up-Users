@@ -1,6 +1,7 @@
 import Home from "./components/home/Home";
 import Events from "./components/events/Events";
 import AddNew from "./components/organizer/AddNew";
+import Login from "D:\\Green-Up-Users\\src\\components\\organizer\\Login.jsx";
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
@@ -20,7 +21,7 @@ function App() {
 
   async function getInstruments() {
     const { data, error } = await supabase.from("instruments").select();
-
+    console.log("test madafaka");
     if (error) {
       console.error("Error fetching instruments:", error.message);
     } else {
@@ -43,6 +44,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/events" element={<Events />} />
           <Route path="/organizenew" element={<AddNew />} />
+          <Route path="/organizerlogin" element={<Login />} />
         </Routes>
       </BrowserRouter>
     </>
