@@ -1,7 +1,7 @@
 import Home from "./components/home/Home";
 import Events from "./components/events/Events";
 import AddNew from "./components/organizer/AddNew";
-import Login from "./components/organizer/Login";
+import Login from "./components/organizer/login";
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
