@@ -1,7 +1,8 @@
 import Home from "./components/home/Home";
 import Events from "./components/events/Events";
 import AddNew from "./components/organizer/AddNew";
-import Login from "./components/organizer/Login";
+import RegisterEvent from "./components/user/RegisterEvent";
+import Login from "./components/organizer/Login.jsx";
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
@@ -45,6 +46,7 @@ function App() {
           <Route path="/events" element={<Events />} />
           <Route path="/organizenew" element={<AddNew />} />
           <Route path="/organizerlogin" element={<Login />} />
+          <Route path="/registerforevent" element={<RegisterEvent />} />
         </Routes>
       </BrowserRouter>
     </>
