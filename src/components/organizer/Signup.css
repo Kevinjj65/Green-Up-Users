@@ -1,0 +1,131 @@
+/* SignUp.css */
+
+.signup-container {
+  background: rgb(31, 30, 30);
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 320px;
+  text-align: center;
+}
+
+.signup-title {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: white;
+}
+
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.signup-form input {
+  width: 92%;
+  padding: 10px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+  background-color: white;
+  color: #333;
+}
+
+.signup-form .name-fields {
+  display: flex;
+  justify-content: space-between;
+  width: 92%; 
+}
+
+.signup-form .name-fields input {
+  width: 48%; 
+}
+.terms-container {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 0px;
+  margin: 1px 0;
+}
+.terms-container input {
+  margin-right: 8px;
+}
+.terms{
+  display: flex;
+  margin-top: 4px;
+  font-size:11px;
+  margin-right: 25px;
+  white-space: nowrap;
+}
+
+.signup-form .signup-btn {
+  width: 94%;
+  padding: 7px;
+  margin-top: 16px;
+  border: none;
+  border-radius: 5px;
+  background-color: #AED36C;
+  color: rgb(0, 0, 0);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.signup-form .or-text {
+  display: flex;
+  color: white;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.signup-form .google-btn {
+  display: flex;                 
+  justify-content: center; 
+  margin-left: -10px;     
+  gap: 10px;                     
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: none;
+  border-radius: 5px;                  
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.signup-form .signup-btn:hover {
+  background-color: #8be79c;
+}
+
+.signup-form .google-btn:hover {
+  color: rgb(197, 197, 198);
+  text-decoration: underline;
+  text-decoration-color: blue;
+}
+
+.signup-form .log-text {
+  color: white;
+  margin-top: 10px;
+  font-size: small;
+}
+
+.signup-form .login-btn{
+  color: rgb(87, 211, 100);
+}
+.signup-form .login-btn:hover{
+  color: rgb(123, 123, 238);
+  text-decoration: underline;
+}
+.signup-form .volunteer-text {
+  color: white;
+  margin-top: 10px;
+  font-size: small;
+}
+.signup-form .volunteer-btn{
+  color: rgb(87, 211, 100);
+}
+.signup-form .volunteer-btn:hover{
+  color: rgb(123, 123, 238);
+  text-decoration: underline;
+}

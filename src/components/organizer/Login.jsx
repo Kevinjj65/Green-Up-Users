@@ -1,12 +1,13 @@
 
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import  { useState } from "react";
 import "./Login.css";
 import { FcGoogle } from "react-icons/fc";
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-
+  const navigate = useNavigate();
   const handleLogin = (e) => {
     e.preventDefault();
     console.log("Username:", username, "Password:", password);
@@ -14,6 +15,9 @@ export default function Login() {
   const handleGoogleLogin = () => {
     console.log("Signing in with Google...");
     // Add Google authentication logic here
+  };
+  const handleSignUpClick = () => {
+    navigate("/organizersignup"); // Navigate to Login page when button is clicked
   };
   return (
     <div className="login-container">
@@ -39,6 +43,15 @@ export default function Login() {
         <FcGoogle size={24} />
         <span>Sign in with Google</span>
         </button>
+        <p className="sign-text">Not a Member?{" "}
+        <button
+            type="button"
+            className="signup-btn"
+            onClick={handleSignUpClick}
+          >
+            Sign Up
+          </button>
+        </p>
       </form>
     </div>
   

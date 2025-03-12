@@ -31,9 +31,11 @@ body {
     width: 92%;
     padding: 10px;
     margin: 8px 0;
-    border: 1px solid #ccc;
+    border: 1px solid #ffffff;
     border-radius: 5px;
     font-size: 16px;
+    background-color: white;
+    color: black;
   }
   .login-form .login-btn{
     width: 94%;
@@ -45,6 +47,7 @@ body {
     color: rgb(0, 0, 0);
     font-size: 16px;
     cursor: pointer;
+    font-weight:400;
   }
   .login-form .or-text{
     display: flex; 
@@ -72,9 +75,20 @@ body {
     background-color: #8be79c;
   }
 
-  .login-form .google-btn span:hover {
-    color: rgb(197, 197, 198);
+  .login-form .google-btn:hover {
+    color: rgb(94, 94, 209);
     text-decoration: underline;
     text-decoration-color: blue;
+  }
+
+  .login-form .sign-text {
+    font-size: small;
+  }
+  .login-form .signup-btn{
+    color: rgb(87, 211, 100);
+  }
+  .login-form .signup-btn:hover{
+    color: rgb(123, 123, 238);
+    text-decoration: underline;
   }
   
