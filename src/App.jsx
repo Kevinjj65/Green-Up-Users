@@ -1,7 +1,7 @@
 import Home from "./components/home/Home";
 import Events from "./components/events/Events";
 import AddNew from "./components/organizer/AddNew";
-import RegisterEvent from "./components/user/RegisterEvent";
+import RegisterEvent from "./components/user/RegisterEvent/RegisterEvent";
 import Login from "./components/organizer/Login.jsx";
 import SignUp from "./components/organizer/Signup";
 // import { useEffect, useState } from "react";
