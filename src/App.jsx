@@ -3,8 +3,9 @@ import Events from "./components/events/Events";
 import AddNew from "./components/organizer/AddNew";
 import RegisterEvent from "./components/user/RegisterEvent";
 import Login from "./components/organizer/Login.jsx";
-import { useEffect, useState } from "react";
-import { supabase } from "./services/supabaseClient.jsx";
+import SignUp from "./components/organizer/Signup";
+// import { useEffect, useState } from "react";
+// import { supabase } from "./services/supabaseClient.jsx";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 
@@ -14,7 +15,6 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 //   useEffect(() => {
 //     getInstruments();
 //   }, []);
-
 //   async function getInstruments() {
 //     const { data, error } = await supabase.from("instruments").select();
 //     console.log("test madafaka");
@@ -24,6 +24,14 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 //       setInstruments(data);
 //     }
 //   }
+  // async function getInstruments() {
+  //   const { data, error } = await supabase.from("instruments").select();
+  //   if (error) {
+  //     console.error("Error fetching instruments:", error.message);
+  //   } else {
+  //     setInstruments(data);
+  //   }
+  // }
 
   return (
     <>
@@ -41,7 +49,8 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
           <Route path="/events" element={<Events />} />
           <Route path="/organizenew" element={<AddNew />} />
           <Route path="/organizerlogin" element={<Login />} />
-          <Route path="/registerforevent" element={<RegisterEvent />} />
+          <Route path="/registerevent" element={<RegisterEvent />} />
+          <Route path="/organizersignup" element={<SignUp />} />
         </Routes>
       </BrowserRouter>
     </>
