@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient("https://qpedcspyudeptjfwuwhl.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwZWRjc3B5dWRlcHRqZnd1d2hsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA3MzMyNDIsImV4cCI6MjA1NjMwOTI0Mn0._M89M93iD2Dayi1DKq3NB3xt7sGWHh5KTS2VEh75SKA");
-
+import { supabase } from "../../services/supabaseClient";
 const AuthModal = ({ isOpen, onClose }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({

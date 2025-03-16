@@ -5,39 +5,46 @@ import Login from './components/organizer/Login';
 import Maps from './components/volunteer/maps';
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import RegisterEvent from "./components/user/RegisterEvent/RegisterEvent";
+import Login from "./components/organizer/Login.jsx";
+import SignUp from "./components/organizer/Signup";
+// import { useEffect, useState } from "react";
+// import { supabase } from "./services/supabaseClient.jsx";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
-// Initialize Supabase Client (Replace with your actual project details)
-const supabase = createClient(
-  "https://qpedcspyudeptjfwuwhl.supabase.co", 
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwZWRjc3B5dWRlcHRqZnd1d2hsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA3MzMyNDIsImV4cCI6MjA1NjMwOTI0Mn0._M89M93iD2Dayi1DKq3NB3xt7sGWHh5KTS2VEh75SKA"
-);
 
-function App() {
-  const [instruments, setInstruments] = useState([]);
+ function App() {
+//   const [instruments, setInstruments] = useState([]);
 
-  useEffect(() => {
-    getInstruments();
-  }, []);
-
-  async function getInstruments() {
-    const { data, error } = await supabase.from("instruments").select();
-    console.log("test madafaka");
-    if (error) {
-      console.error("Error fetching instruments:", error.message);
-    } else {
-      setInstruments(data);
-    }
-  }
+//   useEffect(() => {
+//     getInstruments();
+//   }, []);
+//   async function getInstruments() {
+//     const { data, error } = await supabase.from("instruments").select();
+//     console.log("test madafaka");
+//     if (error) {
+//       console.error("Error fetching instruments:", error.message);
+//     } else {
+//       setInstruments(data);
+//     }
+//   }
+  // async function getInstruments() {
+  //   const { data, error } = await supabase.from("instruments").select();
+  //   if (error) {
+  //     console.error("Error fetching instruments:", error.message);
+  //   } else {
+  //     setInstruments(data);
+  //   }
+  // }
 
   return (
     <>
       {/* Display instruments from Supabase */}
-      <ul>
+      {/* <ul>
         {instruments.map((instrument) => (
           <li key={instrument.name}>{instrument.name}</li>
         ))}
-      </ul>
+      </ul> */}
 
       {/* Routing Setup */}
       <BrowserRouter>
@@ -46,6 +53,8 @@ function App() {
           <Route path="/events" element={<Events />} />
           <Route path="/organizenew" element={<AddNew />} />
           <Route path="/organizerlogin" element={<Login />} />
+          <Route path="/registerevent" element={<RegisterEvent />} />
+          <Route path="/organizersignup" element={<SignUp />} />
           <Route path="/map" element={<Maps />} />
         </Routes>
       </BrowserRouter>
