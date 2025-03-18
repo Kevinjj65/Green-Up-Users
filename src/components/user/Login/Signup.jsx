@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { supabase } from "./../../services/supabaseClient"; // Adjust path if needed
+import { supabase } from "./../../../services/supabaseClient.jsx"; // Adjust path if needed
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import "./Signup.css"; // Import CSS
 
 const Signup = () => {
@@ -8,12 +9,13 @@ const Signup = () => {
     email: "",
     password: "",
     phone: "", // Added phone number state
-    role: "organizer", // Default role (hidden, cannot be changed)
+    role: "volunteer", // Default role (hidden, cannot be changed)
   });
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [agreed, setAgreed] = useState(false); // Track agreement checkbox
+  const navigate = useNavigate(); // Initialize navigate function
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -45,9 +47,9 @@ const Signup = () => {
     } else {
       alert("Signup successful! Check your email to verify your account.");
 
-      // Insert into participants table if role is organizer
-      if (role === "organizer" && data.user) {
-        const { error: insertError } = await supabase.from("organizers").insert([
+      // Insert into participants table if role is volunteer
+      if (role === "volunteer" && data.user) {
+        const { error: insertError } = await supabase.from("participants").insert([
           {
             id: data.user.id,
             name,
@@ -115,10 +117,10 @@ const Signup = () => {
       </form>
       {error && <p className="error">{error}</p>}
       <p>
-        Already a Member? <a href="/login">Login</a>
+        Already a Member? <span className="link" onClick={() => navigate("/userlogin")}>Login</span>
       </p>
       <p>
-        Are you an Organizer? <a href="/organizer-signup">Click here</a>
+        Are you an Organizer? <span className="link" onClick={() => navigate("/organizerlogin")}>Click here</span>
       </p>
     </div>
   );

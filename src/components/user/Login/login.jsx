@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { supabase } from "./../../services/supabaseClient"; // Adjust the path if needed
+import { supabase } from "./../../../services/supabaseClient.jsx"; // Adjust the path if needed
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
@@ -75,7 +75,7 @@ const Login = () => {
         </form>
         <p className="signup-text">
           Not yet a Member?{" "}
-          <span className="signup-link" onClick={() => navigate("/organizersignup")}>
+          <span className="signup-link" onClick={() => navigate("/usersignup")}>
             Sign Up
           </span>
         </p>
