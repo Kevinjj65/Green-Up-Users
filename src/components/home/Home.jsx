@@ -6,8 +6,8 @@ import AuthModal from "../authentication/AuthModal";
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY; // Store in .env
 
 const Home = () => {
-  
-  const [events, setEvents] = useState([]); // Store events
+  const [events, setEvents] = useState([]);
+  const [userLocation, setUserLocation] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -52,7 +52,9 @@ const Home = () => {
     } catch (error) {
       console.error("Error fetching events:", error.message);
     }
-  };const fetchAllEvents = async () => {
+  };
+
+  const fetchAllEvents = async () => {
     try {
       const { data, error } = await supabase.from("events").select("*");
   
@@ -95,17 +97,12 @@ const Home = () => {
   };
 
   return (
-    <div className="home-container">
+    <div className="min-h-screen bg-[#1e1e1e] text-[#39FF14]">
       {/* Header */}
-      <header className="home-header">
-        <h1 className="home-title">GREEN UP</h1>
-
-        {/* Fixed Login Button - Side-aligned */}
-        <button onClick={() => navigate('/userlogin')} className="home-login-btn">
       <header className="bg-[#1e1e1e] py-4 px-6 flex justify-between items-center border-b border-[#39FF14]">
         <h1 className="text-3xl font-bold">GREEN UP</h1>
         <button
-          onClick={() => setIsAuthOpen(true)}
+          onClick={() => navigate("/userlogin")}
           className="bg-[#39FF14] text-[#1e1e1e] font-semibold px-6 py-2 rounded-full 
                      shadow-lg hover:scale-105 transition-all duration-300 border border-[#39FF14] 
                      hover:shadow-[#39FF14] hover:shadow-md"
@@ -114,13 +111,12 @@ const Home = () => {
         </button>
       </header>
 
-    
       {/* Main Section */}
       <main className="p-6">
         <h2 className="text-3xl font-semibold mb-4">Nearby Events</h2>
 
         {/* Event Grid */}
-        <div className="home-event-grid">
+        <div className="grid grid-cols-2 md-grid-cols-3 lg-grid-cols-4 gap-6">
           {events.length > 0 ? (
             events.map((event) => (
               <div key={event.id} className="bg-[#39FF14] text-[#1e1e1e] p-4 rounded-lg shadow-lg">
