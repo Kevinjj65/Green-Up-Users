@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../../services/supabaseClient"; // Import Supabase client
+import { supabase } from "../../services/supabaseClient";
 import AuthModal from "../authentication/AuthModal";
-import "./Home.css"; // Import CSS file
+
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY; // Store in .env
 
 const Home = () => {
   
@@ -10,24 +11,88 @@ const Home = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Function to fetch events from Supabase
-    const fetchEvents = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("events") // Fetch from the "events" table
-          .select("title, location, images, date");
-
-        if (error) throw error;
-
-        // Update state with fetched events
-        setEvents(data);
-      } catch (error) {
-        console.error("Error fetching events:", error.message);
+    // Get user's location
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setUserLocation({ latitude, longitude });
+      },
+      (error) => {
+        console.error("Error getting user location:", error);
       }
-    };
-
-    fetchEvents(); // Call function on component mount
+    );
   }, []);
+
+  useEffect(() => {
+    fetchAllEvents();
+  }, []);
+  
+
+  const fetchNearbyEvents = async (userLat, userLon) => {
+    try {
+      const { data, error } = await supabase.rpc("get_nearby_events", {
+        user_lat: userLat,
+        user_lon: userLon,
+        radius_km: 10, // Find events within 10 km
+      });
+
+      if (error) throw error;
+
+      console.log("Fetched Nearby Events:", data);
+
+      // Convert lat/lon to readable addresses
+      const eventsWithAddresses = await Promise.all(
+        data.map(async (event) => {
+          const address = await getReadableAddress(event.latitude, event.longitude);
+          return { ...event, address };
+        })
+      );
+
+      setEvents(eventsWithAddresses);
+    } catch (error) {
+      console.error("Error fetching events:", error.message);
+    }
+  };const fetchAllEvents = async () => {
+    try {
+      const { data, error } = await supabase.from("events").select("*");
+  
+      if (error) throw error;
+  
+      console.log("Fetched All Events:", data);
+  
+      // Convert lat/lon to readable addresses
+      const eventsWithAddresses = await Promise.all(
+        data.map(async (event) => {
+          const address = await getReadableAddress(event.latitude, event.longitude);
+          return { ...event, address };
+        })
+      );
+  
+      setEvents(eventsWithAddresses);
+    } catch (error) {
+      console.error("Error fetching events:", error.message);
+    }
+  };
+  
+
+  // Function to get the human-readable address from Google Maps API
+  const getReadableAddress = async (lat, lon) => {
+    if (!lat || !lon) return "Unknown Location";
+
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=${GOOGLE_MAPS_API_KEY}`
+      );
+
+      if (!response.ok) throw new Error(`API error: ${response.statusText}`);
+
+      const data = await response.json();
+      return data.results[0]?.formatted_address || "Unknown Location";
+    } catch (error) {
+      console.error("Error fetching address:", error.message);
+      return "Unknown Location";
+    }
+  };
 
   return (
     <div className="home-container">
@@ -37,35 +102,47 @@ const Home = () => {
 
         {/* Fixed Login Button - Side-aligned */}
         <button onClick={() => navigate('/userlogin')} className="home-login-btn">
+      <header className="bg-[#1e1e1e] py-4 px-6 flex justify-between items-center border-b border-[#39FF14]">
+        <h1 className="text-3xl font-bold">GREEN UP</h1>
+        <button
+          onClick={() => setIsAuthOpen(true)}
+          className="bg-[#39FF14] text-[#1e1e1e] font-semibold px-6 py-2 rounded-full 
+                     shadow-lg hover:scale-105 transition-all duration-300 border border-[#39FF14] 
+                     hover:shadow-[#39FF14] hover:shadow-md"
+        >
           Login
         </button>
       </header>
 
     
       {/* Main Section */}
-      <main className="home-main">
-        <h2 className="home-section-title">Upcoming Events</h2>
+      <main className="p-6">
+        <h2 className="text-3xl font-semibold mb-4">Nearby Events</h2>
 
         {/* Event Grid */}
         <div className="home-event-grid">
           {events.length > 0 ? (
-            events.map((event, index) => (
-              <div key={index} className="home-event-card">
-                {/* Event Image */}
-                <img src={event.images} alt={event.title} className="home-event-image" />
-                
-                {/* Event Title */}
-                <h3 className="home-event-title">{event.title}</h3>
-
-                {/* Event Location */}
-                <p className="home-event-location">{event.location}</p>
-
-                {/* Event Date */}
-                <p className="home-event-date">{event.date}</p>
+            events.map((event) => (
+              <div key={event.id} className="bg-[#39FF14] text-[#1e1e1e] p-4 rounded-lg shadow-lg">
+                <img
+                  src={event.images}
+                  alt={event.title}
+                  className="w-full h-40 object-cover rounded-lg"
+                />
+                <h3 className="text-lg font-semibold mt-2">{event.title}</h3>
+                <p className="text-[#1e1e1e] font-medium">{event.address}</p>
+                <p className="text-[#1e1e1e] font-medium">
+                  {new Date(event.date).toLocaleDateString("en-US", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </p>
               </div>
             ))
           ) : (
-            <p className="home-no-events">No upcoming events available.</p>
+            <p className="text-gray-400">No nearby events found.</p>
           )}
         </div>
       </main>

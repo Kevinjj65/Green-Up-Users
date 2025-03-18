@@ -12,7 +12,7 @@ import SSignup from '././components/user/Login/Signup.jsx'
 // import { useEffect, useState } from "react";
 // import { supabase } from "./services/supabaseClient.jsx";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-
+import AfterRegistration from "./components/user/AfterRegistration/AfterRegistration";
 
  function App() {
 //   const [instruments, setInstruments] = useState([]);
@@ -59,7 +59,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
           
           <Route path="/registerevent" element={<RegisterEvent />} />
           <Route path="/organizersignup" element={<SignUp />} />
-          <Route path="/map" element={<Maps />} />
+          <Route path="/afterregistration" element={<AfterRegistration/>} />
         </Routes>
       </BrowserRouter>
     </>
