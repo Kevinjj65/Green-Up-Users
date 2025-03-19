@@ -99,7 +99,7 @@ function RegisterEvent() {
   
     // Insert registration into the "event_registrations" table
     const { data, error } = await supabase
-      .from("event_registrations")
+      .from("registrations ")
       .insert([{ user_id: userId, event_id: eventId }]);
   
     if (error) {
