@@ -13,6 +13,9 @@ function RegisterEvent() {
   const [eventData, setEventData] = useState(null);
   const [eventAddress, setEventAddress] = useState(""); // 🌍 Address from Geocoding
   const [loading, setLoading] = useState(true);
+  const [registering, setRegistering] = useState(false);
+  const [registrationMessage, setRegistrationMessage] = useState(""); // Success/Error messages
+
 
   useEffect(() => {
     async function fetchEvent() {
@@ -77,6 +80,39 @@ function RegisterEvent() {
     return <p>Event not found.</p>;
   }
 
+  async function handleRegister() {
+    if (!id) return;
+  
+    setRegistering(true);
+    setRegistrationMessage("");
+  
+    // Assuming you have a logged-in user (Replace this with actual user retrieval logic)
+    const { data: user, error: userError } = await supabase.auth.getUser();
+    if (userError || !user?.user) {
+      setRegistrationMessage("Please log in to register for the event.");
+      setRegistering(false);
+      return;
+    }
+  
+    const userId = user.user.id; // 🔑 Get logged-in user's ID
+    const eventId = id;
+  
+    // Insert registration into the "event_registrations" table
+    const { data, error } = await supabase
+      .from("event_registrations")
+      .insert([{ user_id: userId, event_id: eventId }]);
+  
+    if (error) {
+      console.error("Error registering for event:", error.message);
+      setRegistrationMessage("Failed to register. Try again.");
+    } else {
+      setRegistrationMessage("Successfully registered!");
+    }
+  
+    setRegistering(false);
+  }
+  
+
   // Format Date
   const formattedDate = new Date(eventData.date).toLocaleDateString("en-US", {
     year: "numeric",
@@ -110,7 +146,10 @@ function RegisterEvent() {
           <div className="rew-pts">{eventData.rewardPoints} Points</div>
           
           {/* ✅ Neon Green "Register Now" Button */}
-          <button className="register-btn">Register Now</button>
+          <button className="register-btn" onClick={handleRegister} disabled={registering}>
+            {registering ? "Registering..." : "Register Now"}
+          </button>
+          {registrationMessage && <p className="registration-message">{registrationMessage}</p>}
         </div>
       </main>
       <Footer />
