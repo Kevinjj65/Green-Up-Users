@@ -120,7 +120,7 @@ const Home = () => {
           {events.length > 0 ? (
             events.map((event) => (
               <div key={event.id} className="bg-[#39FF14] text-[#1e1e1e] p-4 rounded-lg shadow-lg">
-                <img
+                <img onClick={()=> navigate("/userlogin")}
                   src={event.images}
                   alt={event.title}
                   className="w-full h-40 object-cover rounded-lg"

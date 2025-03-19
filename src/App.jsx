@@ -1,9 +1,9 @@
 import Home from "./components/home/Home";
 import Events from "./components/events/Events";
 import AddNew from "./components/organizer/AddNew";
-import Maps from './components/volunteer/maps';
-import { useEffect, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
+// import Maps from './components/volunteer/maps';
+// import { useEffect, useState } from "react";
+// import { createClient } from "@supabase/supabase-js";
 import RegisterEvent from "./components/user/RegisterEvent/RegisterEvent";
 import Login from "./components/organizer/Login.jsx";
 import SignUp from "./components/organizer/Signup";
@@ -56,8 +56,7 @@ import AfterRegistration from "./components/user/AfterRegistration/AfterRegistra
           <Route path="/organizerlogin" element={<Login />} />
           <Route path="/userlogin" element={<LLogin />} />
           <Route path="/usersignup" element={<SSignup />} />
-          
-          <Route path="/registerevent" element={<RegisterEvent />} />
+          <Route path="/registerevent/:id" element={<RegisterEvent />} />
           <Route path="/organizersignup" element={<SignUp />} />
           <Route path="/afterregistration" element={<AfterRegistration/>} />
         </Routes>
