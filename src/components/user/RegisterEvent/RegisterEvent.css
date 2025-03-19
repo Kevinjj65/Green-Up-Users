@@ -1,10 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
-
-.register-event {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    margin-top: 10%;
+.register-btn {
+    display: block;
     width: 100%;
-    padding: 0 15%;
-}
+    padding: 12px;
+    background-color: #39ff14; /* Neon Green */
+    color: black;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: 0.3s;
+  }
+  
+  .register-btn:hover {
+    background-color: #32e613; /* Slightly Darker Neon Green */
+  }
+  

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { supabase } from "./../../../services/supabaseClient.jsx"; // Adjust the path if needed
 import { useNavigate } from "react-router-dom";
-import "./Login.css";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -39,22 +38,22 @@ const Login = () => {
       }
     } else {
       alert("Login successful!");
-      navigate("/"); // Change route as needed
+      navigate("/events"); // Change route as needed
     }
 
     setLoading(false);
   };
 
   return (
-    <div className="login-container">
-      <div className="login-box">
-        <h2>Welcome Back!</h2>
-        <form onSubmit={handleSubmit}>
+    <div className="min-h-screen flex items-center justify-center bg-green-100">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+        <h2 className="text-2xl font-bold text-green-700 text-center">Welcome Back!</h2>
+        <form onSubmit={handleSubmit} className="mt-4">
           <input
             type="email"
             name="email"
             placeholder="Email"
-            className="input-field"
+            className="w-full p-3 border border-green-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 placeholder:text-green-700"
             value={formData.email}
             onChange={handleChange}
             required
@@ -63,19 +62,23 @@ const Login = () => {
             type="password"
             name="password"
             placeholder="Password"
-            className="input-field"
+            className="w-full p-3 mt-3 border border-green-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 placeholder:text-green-700"
             value={formData.password}
             onChange={handleChange}
             required
           />
-          {error && <p className="error">{error}</p>}
-          <button type="submit" className="login-button" disabled={loading}>
+          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+          <button
+            type="submit"
+            className="w-full bg-green-600 text-white p-3 rounded-lg mt-4 hover:bg-green-700 transition"
+            disabled={loading}
+          >
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
-        <p className="signup-text">
+        <p className="text-center text-green-700 mt-3">
           Not yet a Member?{" "}
-          <span className="signup-link" onClick={() => navigate("/usersignup")}>
+          <span className="text-green-500 cursor-pointer font-semibold hover:underline" onClick={() => navigate("/usersignup")}>
             Sign Up
           </span>
         </p>

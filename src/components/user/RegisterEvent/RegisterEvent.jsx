@@ -1,79 +1,160 @@
 import { useEffect, useState } from "react";
-import Footer from "./../Footer/Footer";
+import { useParams } from "react-router-dom";
+import Footer from "../Footer/Footer";
 import Location from "../Location/Location";
-import {supabase} from "./../../../services/supabaseClient"; // Ensure supabaseClient.js is properly set up
+import { supabase } from "../../../services/supabaseClient";
 import "./RegisterEvent.css";
-import dateicon from "./../../../assets/date.svg";
-import timeicon from "./../../../assets/time.svg";
-import locationicon from "./../../../assets/location.svg"
+import dateicon from "../../../assets/date.svg";
+import timeicon from "../../../assets/time.svg";
+import locationicon from "../../../assets/location.svg";
 
 function RegisterEvent() {
-    const [eventData, setEventData] = useState({
-        titleImage: "default-image-url.jpg", // Provide a default image URL
-        title: "Revive",
-        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin tincidunt congue vulputate. In egestas magna in magna lobortis ultricies. Mauris at iaculis nulla, hendrerit hendrerit odio. Suspendisse luctus at mauris quis dignissim. Ut id justo dictum, finibus orci ac, malesuada massa. Maecenas condimentum lacinia nisl id fermentum.",
-        date: "2025-03-18",
-        startTime: "09:00:00",
-        endTime: "12:30:00",
-        location: "Lions Club, ABC Nagar, Palakkad",
-        rewardPoints: "40"
-    });
+  const { id } = useParams(); // ✅ Get event ID from URL
+  const [eventData, setEventData] = useState(null);
+  const [eventAddress, setEventAddress] = useState(""); // 🌍 Address from Geocoding
+  const [loading, setLoading] = useState(true);
+  const [registering, setRegistering] = useState(false);
+  const [registrationMessage, setRegistrationMessage] = useState(""); // Success/Error messages
 
-    // useEffect(() => {
-    //     async function fetchEvent() {
-    //         const { data, error } = await supabase
-    //             .from("events")
-    //             .select("images, title, description, date, start_time, end_time, location, reward_points")
-    //             .limit(1)
-    //             .single();
 
-    //         if (error) {
-    //             console.error("Error fetching event:", error.message);
-    //         } else {
-    //             setEventData(prevData => ({
-    //                 ...prevData,
-    //                 ...data,
-    //                 titleImage: data.images || "default-image-url.jpg" // Ensure image is always present
-    //             }));
-    //         }
-    //     }
-    //     fetchEvent();
-    // }, []);
+  useEffect(() => {
+    async function fetchEvent() {
+      if (!id) return;
 
-    const dateString = new Date(eventData.date);
-    const formattedDate = dateString.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-    });
+      const { data, error } = await supabase
+        .from("events")
+        .select("images, title, description, date, start_time, end_time, latitude, longitude, reward_points")
+        .eq("id", id)
+        .single();
 
-    return (
-        <>
-            <main>
-                <Location />
-                <div className="register-event">
-                    <div className="title-card">
-                        <img className="title-image" src={eventData.titleImage} alt="Event" />
-                        <p className="title">{eventData.title}</p>
-                    </div>
-                    <p className="description">{eventData.description}</p>
-                    <div className="date" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <img src={dateicon} alt="Date Icon" style={{ width: "20px", height: "20px" }} />
-                        <p>{formattedDate}</p>
-                    </div>
-                    <div className="time">
-                        <img src={timeicon} />
-                        <p className="start-time">{eventData.startTime}</p>
-                        <p className="end-time">{eventData.endTime}</p>
-                    </div>
+      if (error) {
+        console.error("Error fetching event:", error.message);
+      } else {
+        setEventData({
+          titleImage: data.images || "default-image-url.jpg",
+          title: data.title,
+          description: data.description,
+          date: data.date,
+          startTime: data.start_time,
+          endTime: data.end_time,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          rewardPoints: data.reward_points,
+        });
 
-                    <div className="location">{eventData.location}</div>
-                    <div className="rew-pts">{eventData.rewardPoints}</div>
-                </div>
-            </main>
-            <Footer />
-        </>
-    );
+        // 🌍 Convert lat/lon to human-readable address
+        fetchAddressFromCoordinates(data.latitude, data.longitude);
+      }
+      setLoading(false);
+    }
+
+    fetchEvent();
+  }, [id]);
+
+  // 🌍 Function to get human-readable address using Google Geocoding API
+  async function fetchAddressFromCoordinates(lat, lon) {
+    const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY; // ✅ Ensure API Key is in .env
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=${API_KEY}`;
+
+    try {
+      const response = await fetch(url);
+      const result = await response.json();
+      if (result.status === "OK") {
+        const address = result.results[0]?.formatted_address || "Location not found";
+        setEventAddress(address);
+      } else {
+        console.error("Geocoding failed:", result.status);
+        setEventAddress("Unknown Location");
+      }
+    } catch (error) {
+      console.error("Error fetching address:", error);
+      setEventAddress("Unknown Location");
+    }
+  }
+
+  if (loading) {
+    return <p>Loading event details...</p>;
+  }
+
+  if (!eventData) {
+    return <p>Event not found.</p>;
+  }
+
+  async function handleRegister() {
+    if (!id) return;
+  
+    setRegistering(true);
+    setRegistrationMessage("");
+  
+    // Assuming you have a logged-in user (Replace this with actual user retrieval logic)
+    const { data: user, error: userError } = await supabase.auth.getUser();
+    if (userError || !user?.user) {
+      setRegistrationMessage("Please log in to register for the event.");
+      setRegistering(false);
+      return;
+    }
+  
+    const userId = user.user.id; // 🔑 Get logged-in user's ID
+    const eventId = id;
+  
+    // Insert registration into the "event_registrations" table
+    const { data, error } = await supabase
+      .from("registrations ")
+      .insert([{ user_id: userId, event_id: eventId }]);
+  
+    if (error) {
+      console.error("Error registering for event:", error.message);
+      setRegistrationMessage("Failed to register. Try again.");
+    } else {
+      setRegistrationMessage("Successfully registered!");
+    }
+  
+    setRegistering(false);
+  }
+  
+
+  // Format Date
+  const formattedDate = new Date(eventData.date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  return (
+    <>
+      <main>
+        <Location latitude={eventData.latitude} longitude={eventData.longitude} />
+        <div className="register-event">
+          <div className="title-card">
+            <img className="title-image" src={eventData.titleImage} alt="Event" />
+            <p className="title">{eventData.title}</p>
+          </div>
+          <p className="description">{eventData.description}</p>
+          <div className="date">
+            <img src={dateicon} alt="Date Icon" />
+            <p>{formattedDate}</p>
+          </div>
+          <div className="time">
+            <img src={timeicon} alt="Time Icon" />
+            <p className="start-time">{eventData.startTime}</p>
+            <p className="end-time">{eventData.endTime}</p>
+          </div>
+          <div className="location">
+            <img src={locationicon} alt="Location Icon" />
+            <p>{eventAddress}</p> {/* 🌍 Display Human-Readable Address */}
+          </div>
+          <div className="rew-pts">{eventData.rewardPoints} Points</div>
+          
+          {/* ✅ Neon Green "Register Now" Button */}
+          <button className="register-btn" onClick={handleRegister} disabled={registering}>
+            {registering ? "Registering..." : "Register Now"}
+          </button>
+          {registrationMessage && <p className="registration-message">{registrationMessage}</p>}
+        </div>
+      </main>
+      <Footer />
+    </>
+  );
 }
 
 export default RegisterEvent;

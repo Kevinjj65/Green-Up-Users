@@ -27,4 +27,4 @@ function AddNew() {
     )
 }
 
-export default AddNew
+export default AddNew;
