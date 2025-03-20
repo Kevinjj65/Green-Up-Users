@@ -18,14 +18,15 @@ const QRScanner = () => {
         scanner.clear(); // Stop scanning after a successful scan
 
         try {
-          const volunteerData = JSON.parse(decodedText);
-          const { id } = volunteerData;
+          const scanData = JSON.parse(decodedText);
+          const { attendee_id, event_id } = scanData;
 
-          // 🔍 Check if a check-in entry already exists
+          // 🔍 Check if an entry already exists for this attendee and event
           const { data: existingEntry, error: fetchError } = await supabase
-            .from("volunteer_checkins")
+            .from("registrations")
             .select("id, check_in_time, check_out_time")
-            .eq("id", id)
+            .eq("attendee_id", attendee_id)
+            .eq("event_id", event_id)
             .single();
 
           if (fetchError && fetchError.code !== "PGRST116") {
@@ -36,25 +37,32 @@ const QRScanner = () => {
           if (existingEntry && existingEntry.check_out_time === null) {
             // 🟢 Second scan: Update check-out time
             const { error: updateError } = await supabase
-              .from("volunteer_checkins")
+              .from("registrations")
               .update({ check_out_time: new Date().toISOString() })
-              .eq("id", id);
+              .eq("attendee_id", attendee_id)
+              .eq("event_id", event_id);
 
             if (updateError) {
               console.error("Error updating check-out time:", updateError);
             } else {
-              console.log("Check-out time recorded for ID:", id);
+              console.log("Check-out time recorded for Attendee ID:", attendee_id);
             }
           } else {
             // 🟢 First scan: Insert check-in time
             const { error: insertError } = await supabase
-              .from("volunteer_checkins")
-              .insert([{ id, check_in_time: new Date().toISOString() }]);
+              .from("registrations")
+              .insert([{ 
+                attendee_id, 
+                event_id, 
+                check_in_time: new Date().toISOString(), 
+                created_at: new Date().toISOString(),
+                points_awarded: 0 // Default points
+              }]);
 
             if (insertError) {
               console.error("Error inserting check-in time:", insertError);
             } else {
-              console.log("Check-in time recorded for ID:", id);
+              console.log("Check-in time recorded for Attendee ID:", attendee_id);
             }
           }
         } catch (err) {

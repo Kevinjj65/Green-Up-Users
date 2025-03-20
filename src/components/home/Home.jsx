@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../services/supabaseClient";
-import AuthModal from "../authentication/AuthModal";
-
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY; // Store in .env
 
 const Home = () => {
@@ -11,7 +9,6 @@ const Home = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Get user's location
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
@@ -26,58 +23,28 @@ const Home = () => {
   useEffect(() => {
     fetchAllEvents();
   }, []);
-  
-
-  const fetchNearbyEvents = async (userLat, userLon) => {
-    try {
-      const { data, error } = await supabase.rpc("get_nearby_events", {
-        user_lat: userLat,
-        user_lon: userLon,
-        radius_km: 10, // Find events within 10 km
-      });
-
-      if (error) throw error;
-
-      console.log("Fetched Nearby Events:", data);
-
-      // Convert lat/lon to readable addresses
-      const eventsWithAddresses = await Promise.all(
-        data.map(async (event) => {
-          const address = await getReadableAddress(event.latitude, event.longitude);
-          return { ...event, address };
-        })
-      );
-
-      setEvents(eventsWithAddresses);
-    } catch (error) {
-      console.error("Error fetching events:", error.message);
-    }
-  };
 
   const fetchAllEvents = async () => {
     try {
       const { data, error } = await supabase.from("events").select("*");
-  
+
       if (error) throw error;
-  
+
       console.log("Fetched All Events:", data);
-  
-      // Convert lat/lon to readable addresses
+
       const eventsWithAddresses = await Promise.all(
         data.map(async (event) => {
           const address = await getReadableAddress(event.latitude, event.longitude);
           return { ...event, address };
         })
       );
-  
+
       setEvents(eventsWithAddresses);
     } catch (error) {
       console.error("Error fetching events:", error.message);
     }
   };
-  
 
-  // Function to get the human-readable address from Google Maps API
   const getReadableAddress = async (lat, lon) => {
     if (!lat || !lon) return "Unknown Location";
 
@@ -98,12 +65,12 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-[#1e1e1e] text-[#39FF14]">
-      {/* Header */}
-      <header className="bg-[#1e1e1e] py-4 px-6 flex justify-between items-center border-b border-[#39FF14]">
-        <h1 className="text-3xl font-bold">GREEN UP</h1>
+      {/* Header - Fixed at the top */}
+      <header className="bg-[#1e1e1e] py-4 px-6 flex justify-between items-center border-b border-[#39FF14] sticky top-0 z-50">
+        <h1 className="text-2xl font-bold">GREEN UP</h1>
         <button
           onClick={() => navigate("/userlogin")}
-          className="bg-[#39FF14] text-[#1e1e1e] font-semibold px-6 py-2 rounded-full 
+          className="bg-[#39FF14] text-[#1e1e1e] font-semibold px-5 py-1.5 text-sm rounded-full 
                      shadow-lg hover:scale-105 transition-all duration-300 border border-[#39FF14] 
                      hover:shadow-[#39FF14] hover:shadow-md"
         >
@@ -115,19 +82,23 @@ const Home = () => {
       <main className="p-6">
         <h2 className="text-3xl font-semibold mb-4">Nearby Events</h2>
 
-        {/* Event Grid */}
-        <div className="grid grid-cols-2 md-grid-cols-3 lg-grid-cols-4 gap-6">
+        {/* Horizontally Scrollable Event List */}
+        <div className="flex space-x-6 overflow-x-auto scrollbar-hide p-2">
           {events.length > 0 ? (
             events.map((event) => (
-              <div key={event.id} className="bg-[#39FF14] text-[#1e1e1e] p-4 rounded-lg shadow-lg">
-                <img onClick={()=> navigate("/userlogin")}
+              <div
+                key={event.id}
+                className="bg-[#39FF14] text-[#1e1e1e] p-4 rounded-lg shadow-lg w-64 flex-shrink-0"
+              >
+                <img
+                  onClick={() => navigate("/userlogin")}
                   src={event.images}
                   alt={event.title}
                   className="w-full h-40 object-cover rounded-lg"
                 />
                 <h3 className="text-lg font-semibold mt-2">{event.title}</h3>
-                <p className="text-[#1e1e1e] font-medium">{event.address}</p>
-                <p className="text-[#1e1e1e] font-medium">
+                <p className="text-sm font-medium">{event.address}</p>
+                <p className="text-sm font-medium">
                   {new Date(event.date).toLocaleDateString("en-US", {
                     weekday: "long",
                     year: "numeric",
