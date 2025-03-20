@@ -57,10 +57,9 @@ import AfterRegistration from "./components/user/AfterRegistration/AfterRegistra
           <Route path="/userlogin" element={<LLogin />} />
           <Route path="/usersignup" element={<SSignup />} />
           <Route path="/maps" element={<Maps />} />
-          
-          <Route path="/registerevent" element={<RegisterEvent />} />
+          <Route path="/registerevent/:id" element={<RegisterEvent />} />
           <Route path="/organizersignup" element={<SignUp />} />
-          <Route path="/afterregistration" element={<AfterRegistration/>} />
+          <Route path="/afterregistration/:eventId/:userId" element={<AfterRegistration/>} />
         </Routes>
       </BrowserRouter>
     </>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom"; // ✅ Added useNavigate for redirection
 import Footer from "../Footer/Footer";
 import Location from "../Location/Location";
 import { supabase } from "../../../services/supabaseClient";
@@ -10,12 +10,12 @@ import locationicon from "../../../assets/location.svg";
 
 function RegisterEvent() {
   const { id } = useParams(); // ✅ Get event ID from URL
+  const navigate = useNavigate(); // ✅ Navigation for redirection
   const [eventData, setEventData] = useState(null);
   const [eventAddress, setEventAddress] = useState(""); // 🌍 Address from Geocoding
   const [loading, setLoading] = useState(true);
   const [registering, setRegistering] = useState(false);
   const [registrationMessage, setRegistrationMessage] = useState(""); // Success/Error messages
-
 
   useEffect(() => {
     async function fetchEvent() {
@@ -86,7 +86,7 @@ function RegisterEvent() {
     setRegistering(true);
     setRegistrationMessage("");
   
-    // Assuming you have a logged-in user (Replace this with actual user retrieval logic)
+    // Get the logged-in user
     const { data: user, error: userError } = await supabase.auth.getUser();
     if (userError || !user?.user) {
       setRegistrationMessage("Please log in to register for the event.");
@@ -97,21 +97,31 @@ function RegisterEvent() {
     const userId = user.user.id; // 🔑 Get logged-in user's ID
     const eventId = id;
   
-    // Insert registration into the "event_registrations" table
+    // Insert registration into the "registrations" table
     const { data, error } = await supabase
-      .from("registrations ")
-      .insert([{ user_id: userId, event_id: eventId }]);
+      .from("registrations")
+      .insert([
+        {
+          attendee_id: userId,
+          event_id: eventId,
+          check_in_time: null,  // Default null
+          check_out_time: null, // Default null
+          points_awarded: null, // Default null
+        }
+      ]);
   
     if (error) {
       console.error("Error registering for event:", error.message);
       setRegistrationMessage("Failed to register. Try again.");
     } else {
       setRegistrationMessage("Successfully registered!");
+      
+      // ✅ Redirect to AfterRegistration page
+      navigate(`/afterregistration/${eventId}/${userId}`);
     }
   
     setRegistering(false);
   }
-  
 
   // Format Date
   const formattedDate = new Date(eventData.date).toLocaleDateString("en-US", {
