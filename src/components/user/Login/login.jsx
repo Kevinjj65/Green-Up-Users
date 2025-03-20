@@ -78,8 +78,20 @@ const Login = () => {
         </form>
         <p className="text-center text-green-700 mt-3">
           Not yet a Member?{" "}
-          <span className="text-green-500 cursor-pointer font-semibold hover:underline" onClick={() => navigate("/usersignup")}>
+          <span
+            className="text-green-500 cursor-pointer font-semibold hover:underline"
+            onClick={() => navigate("/usersignup")}
+          >
             Sign Up
+          </span>
+        </p>
+        <p className="text-center text-green-700 mt-1">
+          Are you an Organizer?{" "}
+          <span
+            className="text-green-500 cursor-pointer font-semibold hover:underline"
+            onClick={() => navigate("/organizerlogin")}
+          >
+            Click here
           </span>
         </p>
       </div>
