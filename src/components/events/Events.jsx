@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../services/supabaseClient";
 import { MapPinIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/solid";
-import Footer from "../footer/Footer";
+import Footer from "../user/Footer/Footer.jsx";
 
 const Events = () => {
   const navigate = useNavigate();
