@@ -13,6 +13,7 @@ import Maps from '././components/Maps/Maps.jsx'
 // import { supabase } from "./services/supabaseClient.jsx";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import AfterRegistration from "./components/user/AfterRegistration/AfterRegistration";
+import UserProfile from "./components/user/UserProfile/UserProfile.jsx";
 
  function App() {
 //   const [instruments, setInstruments] = useState([]);
@@ -61,6 +62,7 @@ import AfterRegistration from "./components/user/AfterRegistration/AfterRegistra
           <Route path="/registerevent/:id" element={<RegisterEvent />} />
           <Route path="/organizersignup" element={<SignUp />} />
           <Route path="/afterregistration/:eventId/:attendeeId" element={<AfterRegistration />} />
+          <Route path="/userprofile" element={<UserProfile />} />
         </Routes>
       </BrowserRouter>
     </>
