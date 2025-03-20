@@ -23,6 +23,7 @@ const Login = () => {
 
     const { email, password } = formData;
 
+    // Step 1: Attempt to log in with Supabase Auth
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -36,11 +37,27 @@ const Login = () => {
       } else {
         setError(error.message);
       }
-    } else {
-      alert("Login successful!");
-      navigate("/events"); // Change route as needed
+      setLoading(false);
+      return;
     }
 
+    // Step 2: Check if email exists in the 'participants' table
+    const { data: participant, error: participantError } = await supabase
+      .from("participants")
+      .select("email_id")
+      .eq("email_id", email)
+      .single();
+
+    if (participantError || !participant) {
+      setError("You are not registered as a participant.");
+      await supabase.auth.signOut(); // Sign out if email is not found
+      setLoading(false);
+      return;
+    }
+
+    // Step 3: Proceed to events page if email exists in 'participants'
+    alert("Login successful!");
+    navigate("/events");
     setLoading(false);
   };
 

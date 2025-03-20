@@ -24,6 +24,7 @@ const Login = () => {
 
     const { email, password } = formData;
 
+    // Step 1: Attempt to log in
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -37,11 +38,27 @@ const Login = () => {
       } else {
         setError(error.message);
       }
-    } else {
-      alert("Login successful!");
-      navigate("/"); // Change route as needed
+      setLoading(false);
+      return;
     }
 
+    // Step 2: Check if the email exists in 'organizers' table
+    const { data: organizer, error: organizerError } = await supabase
+      .from("organizers")
+      .select("email_id")
+      .eq("email_id", email)
+      .single();
+
+    if (organizerError || !organizer) {
+      setError("You are not registered as an organizer.");
+      await supabase.auth.signOut(); // Sign out the user
+      setLoading(false);
+      return;
+    }
+
+    // Step 3: Navigate to home page if email exists
+    alert("Login successful!");
+    navigate("/");
     setLoading(false);
   };
 

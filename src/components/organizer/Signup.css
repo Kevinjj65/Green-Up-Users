@@ -30,11 +30,17 @@ input {
   border: none;
   background-color: #fff;
   font-size: 16px;
+  color: #000; /* Ensures text is visible */
+}
+
+input::placeholder {
+  color: #888; /* Light gray placeholder text */
 }
 
 input:focus {
   outline: 2px solid #4caf50;
 }
+
 
 label {
   color: white;

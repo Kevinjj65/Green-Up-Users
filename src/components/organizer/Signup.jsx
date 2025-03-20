@@ -1,19 +1,21 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "./../../services/supabaseClient"; // Adjust path if needed
 import "./Signup.css"; // Import CSS
 
 const Signup = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
-    phone: "", // Added phone number state
-    role: "organizer", // Default role (hidden, cannot be changed)
+    phone: "",
+    role: "organizer",
   });
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [agreed, setAgreed] = useState(false); // Track agreement checkbox
+  const [agreed, setAgreed] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -36,7 +38,7 @@ const Signup = () => {
       email,
       password,
       options: {
-        data: { role, name, phone }, // Store role & phone in auth metadata
+        data: { role, name, phone },
       },
     });
 
@@ -45,19 +47,19 @@ const Signup = () => {
     } else {
       alert("Signup successful! Check your email to verify your account.");
 
-      // Insert into participants table if role is organizer
+      // Insert into organizers table
       if (role === "organizer" && data.user) {
         const { error: insertError } = await supabase.from("organizers").insert([
           {
             id: data.user.id,
             name,
-            email_id: email, // Corrected column name
-            phone_number: phone, // Insert phone number into the table
+            email_id: email,
+            phone_number: phone,
           },
         ]);
 
         if (insertError) {
-          console.error("Error inserting participant:", insertError);
+          console.error("Error inserting organizer:", insertError);
         }
       }
     }
@@ -67,7 +69,7 @@ const Signup = () => {
 
   return (
     <div className="signup-container">
-      <h2>Be a Volunteer Now!</h2>
+      <h2>Be an Organizer Now!</h2>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
@@ -102,11 +104,11 @@ const Signup = () => {
           required
         />
         <label>
-          <input 
-            type="checkbox" 
-            checked={agreed} 
-            onChange={(e) => setAgreed(e.target.checked)} 
-          /> 
+          <input
+            type="checkbox"
+            checked={agreed}
+            onChange={(e) => setAgreed(e.target.checked)}
+          />{" "}
           I agree to Terms & Conditions
         </label>
         <button type="submit" disabled={loading}>
@@ -115,10 +117,16 @@ const Signup = () => {
       </form>
       {error && <p className="error">{error}</p>}
       <p>
-        Already a Member? <a href="/login">Login</a>
+        Already a Member?{" "}
+        <span className="link" onClick={() => navigate("/organizerlogin")}>
+        <u>Click Here</u>
+        </span>
       </p>
       <p>
-        Are you an Organizer? <a href="/organizer-signup">Click here</a>
+        Are you a Volunteer?{" "}
+        <span className="link" onClick={() => navigate("/userlogin")}>
+          <u>Click Here</u>
+        </span>
       </p>
     </div>
   );
