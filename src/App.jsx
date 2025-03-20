@@ -1,6 +1,7 @@
 import Home from "./components/home/Home";
 import Events from "./components/events/Events";
 import AddNew from "./components/organizer/AddNew";
+import Scan from './components/organizer/scan.jsx'
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import RegisterEvent from "./components/user/RegisterEvent/RegisterEvent";
@@ -13,6 +14,7 @@ import Maps from '././components/Maps/Maps.jsx'
 // import { supabase } from "./services/supabaseClient.jsx";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import AfterRegistration from "./components/user/AfterRegistration/AfterRegistration";
+import UserProfile from "./components/user/UserProfile/UserProfile.jsx";
 
  function App() {
 //   const [instruments, setInstruments] = useState([]);
@@ -57,9 +59,13 @@ import AfterRegistration from "./components/user/AfterRegistration/AfterRegistra
           <Route path="/userlogin" element={<LLogin />} />
           <Route path="/usersignup" element={<SSignup />} />
           <Route path="/maps" element={<Maps />} />
+
           <Route path="/registerevent/:id" element={<RegisterEvent />} />
           <Route path="/organizersignup" element={<SignUp />} />
           <Route path="/afterregistration/:eventId/:userId" element={<AfterRegistration/>} />
+
+          <Route path="/scan" element={<Scan />} />
+          <Route path="/userprofile" element={<UserProfile />} />
         </Routes>
       </BrowserRouter>
     </>

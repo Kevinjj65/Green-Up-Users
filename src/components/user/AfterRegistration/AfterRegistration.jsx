@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { supabase } from "../../../services/supabaseClient";
 import { QRCodeCanvas } from "qrcode.react";
 import { Html5QrcodeScanner } from "html5-qrcode";
+import Footer from "../Footer/Footer.jsx";
 
 const AfterRegistration = () => {
   const { eventId, attendeeId } = useParams();
@@ -146,6 +147,8 @@ const AfterRegistration = () => {
           <div id="qr-reader" className="mt-4"></div>
         </div>
       )}
+
+      <Footer />
     </div>
   );
 };

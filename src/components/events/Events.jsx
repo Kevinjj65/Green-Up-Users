@@ -2,14 +2,17 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../services/supabaseClient";
 import { MapPinIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/solid";
-import Footer from "../footer/Footer";
+import Footer from "../user/Footer/Footer.jsx";
 
 const Events = () => {
   const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [userLocation, setUserLocation] = useState({ latitude: null, longitude: null });
+  const [userAddress, setUserAddress] = useState("Fetching location...");
   const [userName, setUserName] = useState("");
   const [isMapView, setIsMapView] = useState(false);
+
+  const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY; // ✅ Get API Key from .env file
 
   // Fetch User Details
   useEffect(() => {
@@ -57,31 +60,55 @@ const Events = () => {
     fetchEvents();
   }, []);
 
-  // Get User's Current Location
+  // Get User's Current Location & Perform Reverse Geocoding
   useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          });
+        async (position) => {
+          const latitude = position.coords.latitude;
+          const longitude = position.coords.longitude;
+          setUserLocation({ latitude, longitude });
+
+          // ✅ Reverse Geocode to get the address
+          await fetchAddressFromCoordinates(latitude, longitude);
         },
-        (error) => console.error("Error getting location:", error)
+        (error) => console.error("Error getting location:", error),
+        { enableHighAccuracy: true } // ✅ High accuracy for better location precision
       );
     }
   }, []);
+
+  // Function to Reverse Geocode using Google Maps API
+  async function fetchAddressFromCoordinates(lat, lon) {
+    if (!API_KEY) {
+      console.error("Google Maps API Key is missing!");
+      setUserAddress("Location not available");
+      return;
+    }
+
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=${API_KEY}`;
+
+    try {
+      const response = await fetch(url);
+      const result = await response.json();
+      if (result.status === "OK") {
+        setUserAddress(result.results[0]?.formatted_address || "Location not found");
+      } else {
+        console.error("Geocoding failed:", result.status);
+        setUserAddress("Unknown Location");
+      }
+    } catch (error) {
+      console.error("Error fetching address:", error);
+      setUserAddress("Unknown Location");
+    }
+  }
 
   return (
     <div className="min-h-screen bg-green-50 text-green-900">
       <header className="bg-green-700 py-4 px-6 flex items-center justify-between text-white sticky top-0 z-10">
         <div className="flex items-center space-x-2">
           <MapPinIcon className="h-6 w-6 text-white" />
-          <p className="text-sm">
-            {userLocation.latitude && userLocation.longitude
-              ? `${userLocation.latitude.toFixed(4)}, ${userLocation.longitude.toFixed(4)}`
-              : "Fetching location..."}
-          </p>
+          <p className="text-sm">{userAddress}</p> {/* ✅ Show human-readable address */}
         </div>
 
         <h1 className="text-xl font-bold">Welcome, {userName}</h1>
@@ -104,7 +131,7 @@ const Events = () => {
             <div
               key={event.id}
               className="bg-green-200 p-4 rounded-lg shadow-md w-56 cursor-pointer hover:bg-green-300 transition"
-              onClick={() => navigate(`/registerevent/${event.id}`)}  // ✅ Pass event ID
+              onClick={() => navigate(`/registerevent/${event.id}`)} // ✅ Pass event ID
             >
               <img
                 src={event.images}
