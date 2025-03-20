@@ -74,11 +74,13 @@ const Events = () => {
 
         <button
           onClick={() => setIsMapView(!isMapView)}
-          className="flex items-center bg-green-500 px-4 py-2 rounded-lg hover:bg-green-600 transition"
+          className="flex items-center justify-center bg-green-500 text-xs px-3 py-1 rounded-md hover:bg-green-600 transition !h-auto !w-auto"
         >
-          <ArrowsRightLeftIcon className="h-5 w-5 mr-2" />
+          <ArrowsRightLeftIcon className="h-4 w-4 mr-1" />
           {isMapView ? "Events View" : "Map View"}
         </button>
+
+
       </header>
 
       {/* Events List */}

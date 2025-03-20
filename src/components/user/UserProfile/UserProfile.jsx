@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { supabase } from "../../../services/supabaseClient.jsx" // Adjust the path if needed
+import { supabase } from "../../../services/supabaseClient.jsx"; // Adjust path if needed
 import Footer from "../Footer/Footer";
-
+import { useNavigate } from "react-router-dom";
 function UserProfile() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchUserProfile = async () => {
       setLoading(true);
       setError("");
 
-      // Get current authenticated user
+      // Get authenticated user
       const { data: authUser, error: authError } = await supabase.auth.getUser();
 
       if (authError || !authUser?.user) {
@@ -21,14 +21,14 @@ function UserProfile() {
         return;
       }
 
-      const userId = authUser.user.id; // Supabase user ID
+      const userId = authUser.user.id;
 
       // Fetch user details from 'participants' table
       const { data: userData, error: userError } = await supabase
         .from("participants")
         .select("name, email_id, phone_number")
         .eq("id", userId)
-        .single(); // Assuming each user has a unique ID
+        .single();
 
       if (userError) {
         setError("Failed to fetch user data.");
@@ -42,10 +42,17 @@ function UserProfile() {
     fetchUserProfile();
   }, []);
 
+  // Logout function
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/');
+    window.location.reload(); // Refresh page after logout
+  };
+
   return (
-    <div className="w-screen min-h-screen bg-[#1E1E1E] text-white flex flex-col items-center">
-      {/* Main content */}
-      <div className="flex flex-col items-center justify-center w-[80vw] h-[90vh] space-y-8">
+    <div className="w-screen min-h-screen bg-[#1E1E1E] text-white flex flex-col items-center justify-center relative">
+      {/* Main Content */}
+      <div className="flex flex-col items-center justify-center w-[60vw] min-h-[70vh] space-y-8">
         {/* Profile Circle */}
         <div className="w-24 h-24 bg-[#2A2A2A] rounded-full border-2 border-white flex justify-center items-center">
           <p>Profile</p>
@@ -75,7 +82,7 @@ function UserProfile() {
             <div className="relative flex items-center w-full">
               <p className="text-sm text-gray-400 w-[25%] ml-[5%]">Email</p>
               <div className="absolute bottom-[-2px] left-[30%] h-6 w-[2px] bg-white border border-white"></div>
-              <p className="text-md text-gray-300 ml-[10%]">{user?.email || "N/A"}</p>
+              <p className="text-md text-gray-300 ml-[10%]">{user?.email_id || "N/A"}</p>
             </div>
             <div className="w-full h-[2px] bg-white border border-white rounded-md"></div>
 
@@ -83,11 +90,24 @@ function UserProfile() {
             <div className="relative flex items-center w-full">
               <p className="text-sm text-gray-400 w-[25%] ml-[5%]">Phone</p>
               <div className="absolute bottom-[-2px] left-[30%] h-6 w-[2px] bg-white border border-white"></div>
-              <p className="text-md text-gray-300 ml-[10%]">{user?.phone || "N/A"}</p>
+              <p className="text-md text-gray-300 ml-[10%]">{user?.phone_number || "N/A"}</p>
             </div>
             <div className="w-full h-[2px] bg-white border border-white rounded-md"></div>
           </div>
         )}
+      </div>
+
+      {/* Logout Button */}
+      <div className="w-full flex justify-center absolute bottom-20">
+      <button
+  onClick={handleLogout}
+  className="px-2 py-1 text-sm bg-red-600 hover:bg-red-800 text-white font-semibold rounded-md transition duration-200"
+  style={{ width: "80px", minWidth: "unset" }}
+>
+  Logout
+</button>
+
+
       </div>
 
       {/* Footer */}

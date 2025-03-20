@@ -70,12 +70,28 @@ const Home = () => {
         <h1 className="text-2xl font-bold">GREEN UP</h1>
         <button
           onClick={() => navigate("/userlogin")}
-          className="bg-[#39FF14] text-[#1e1e1e] font-semibold px-5 py-1.5 text-sm rounded-full 
-                     shadow-lg hover:scale-105 transition-all duration-300 border border-[#39FF14] 
-                     hover:shadow-[#39FF14] hover:shadow-md"
+          style={{
+            backgroundColor: "#39FF14",
+            color: "#1e1e1e",
+            fontWeight: "bold",
+            width: "100px",
+            height: "35px",
+            fontSize: "14px",
+            borderRadius: "20px",
+            border: "1px solid #39FF14",
+            boxShadow: "0px 2px 4px rgba(57, 255, 20, 0.5)",
+            cursor: "pointer",
+            textAlign: "center",
+            display: "flex",
+            alignItems: "center",  // Centers text vertically
+            justifyContent: "center", // Centers text horizontally
+          }}
         >
           Login
         </button>
+
+
+
       </header>
 
       {/* Main Section */}
