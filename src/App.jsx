@@ -1,6 +1,7 @@
 import Home from "./components/home/Home";
 import Events from "./components/events/Events";
 import AddNew from "./components/organizer/AddNew";
+import Scan from './components/organizer/scan.jsx'
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import RegisterEvent from "./components/user/RegisterEvent/RegisterEvent";
@@ -57,6 +58,7 @@ import AfterRegistration from "./components/user/AfterRegistration/AfterRegistra
           <Route path="/userlogin" element={<LLogin />} />
           <Route path="/usersignup" element={<SSignup />} />
           <Route path="/maps" element={<Maps />} />
+          <Route path="/scan" element={<Scan />} />
           
           <Route path="/registerevent" element={<RegisterEvent />} />
           <Route path="/organizersignup" element={<SignUp />} />
