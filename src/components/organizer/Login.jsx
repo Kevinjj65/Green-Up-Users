@@ -58,7 +58,7 @@ const Login = () => {
 
     // Step 3: Navigate to home page if email exists
     alert("Login successful!");
-    navigate("/");
+    navigate("/organizenew");
     setLoading(false);
   };
 

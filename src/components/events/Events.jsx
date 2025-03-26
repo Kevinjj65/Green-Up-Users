@@ -42,7 +42,7 @@ const Events = () => {
   // Handle Map View Navigation Properly
   useEffect(() => {
     if (isMapView) {
-      navigate("/maps");
+      navigate("/usermaps");
     }
   }, [isMapView, navigate]);
 
