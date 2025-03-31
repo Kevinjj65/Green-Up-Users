@@ -34,7 +34,6 @@ import UserProfile from "./components/user/UserProfile/UserProfile.jsx";
           <Route path="/usermaps" element={<UserMaps />} />
           <Route path="/userprofile" element={<UserProfile />} />
           <Route path="/registerevent/:id" element={<RegisterEvent />} />
-          <Route path="/afterregistration/:eventId/:userId" element={<AfterRegistration/>} />
           <Route path="/organizer/profile" element={<OrganizerProfile />} />
         <Route path="/organizer/events" element={<OrganizerEvents />} />
         <Route path="/organizer/event/:id" element={<EventDetailsOrg />} />
@@ -43,6 +42,9 @@ import UserProfile from "./components/user/UserProfile/UserProfile.jsx";
         <Route path="/orgmaps" element={<OrgMaps />} />
         <Route path="/organizersignup" element={<SignUp />} />
           <Route path="/scan" element={<Scan />} />
+
+          <Route path="/afterregistration/:eventId/:attendeeId" element={<AfterRegistration/>} />
+
         </Routes>
       </BrowserRouter>
     </>
