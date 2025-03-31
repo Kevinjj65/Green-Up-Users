@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";  // ✅ Import useNavigate
 import { supabase } from "../../../services/supabaseClient";
 import { QRCodeCanvas } from "qrcode.react";
 
 const AfterRegistration = () => {
   const { eventId, attendeeId } = useParams();
+  const navigate = useNavigate(); // ✅ Initialize navigate
   const [event, setEvent] = useState(null);
   const [eventAddress, setEventAddress] = useState("Fetching location...");
 
@@ -38,7 +39,6 @@ const AfterRegistration = () => {
     fetchEventDetails();
   }, [eventId]);
 
-  // Function to convert lat/lon to an address using Google Geocoding API
   async function fetchAddressFromCoordinates(lat, lon) {
     const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
     const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=${API_KEY}`;
@@ -63,7 +63,15 @@ const AfterRegistration = () => {
 
   return (
     <div className="flex flex-col items-center">
-      <h1 className="text-2xl font-bold">{event.title}</h1>
+      {/* ✅ Back Button */}
+      <button
+        onClick={() => navigate("/events")} // ✅ Navigate back to Events page
+        className="self-start ml-4 mt-4 px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 transition"
+      >
+        ← Back to Events
+      </button>
+
+      <h1 className="text-2xl font-bold mt-4">{event.title}</h1>
       <p>{event.description}</p>
       <p>📍 {eventAddress}</p>
 

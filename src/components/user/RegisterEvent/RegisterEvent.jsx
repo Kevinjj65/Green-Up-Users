@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-
 import Footer from "../Footer/Footer";
 import Location from "../Location/Location";
 import { supabase } from "../../../services/supabaseClient";
@@ -9,8 +8,8 @@ import timeicon from "../../../assets/time.svg";
 import locationicon from "../../../assets/location.svg";
 
 function RegisterEvent() {
-  const { id } = useParams(); // ✅ Get event ID from URL
-  const navigate = useNavigate(); // ✅ Navigation for redirection
+  const { id } = useParams(); // ✅ Event ID
+  const navigate = useNavigate(); // ✅ Navigation
 
   const [eventData, setEventData] = useState(null);
   const [eventAddress, setEventAddress] = useState("");
@@ -22,7 +21,6 @@ function RegisterEvent() {
     async function fetchEvent() {
       if (!id) return;
 
-      // Get logged-in user
       const { data: user, error: userError } = await supabase.auth.getUser();
       if (userError || !user?.user?.id) {
         setLoading(false);
@@ -31,7 +29,7 @@ function RegisterEvent() {
       const userId = user.user.id;
 
       // ✅ Check if the user is already registered
-      const { data: registration, error: registrationError } = await supabase
+      const { data: registration } = await supabase
         .from("registrations")
         .select("event_id")
         .eq("event_id", id)
@@ -39,12 +37,12 @@ function RegisterEvent() {
         .single();
 
       if (registration) {
-        // ✅ If registered, redirect to AfterRegistration page immediately
+        // ✅ Redirect to AfterRegistration if already registered
         navigate(`/afterregistration/${id}/${userId}`);
         return;
       }
 
-      // ✅ Fetch event details
+      // ✅ Fetch event details if not registered
       const { data, error } = await supabase
         .from("events")
         .select("images, title, description, date, start_time, end_time, latitude, longitude, reward_points")
@@ -123,8 +121,8 @@ function RegisterEvent() {
         {
           attendee_id: userId,
           event_id: eventId,
-          check_in_time: null, 
-          check_out_time: null, 
+          check_in_time: null,
+          check_out_time: null,
           points_awarded: null,
         },
       ]);
