@@ -15,7 +15,7 @@ body {
     padding: 25px;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    width: 320px;
+    width: 350px;
     text-align: center;
   }
   
@@ -29,7 +29,7 @@ body {
   
   .login-form input {
     width: 92%;
-    padding: 10px;
+    padding: 7px;
     margin: 8px 0;
     border: 1px solid #ffffff;
     border-radius: 5px;
@@ -58,15 +58,17 @@ body {
   }
   .login-form .google-btn {
     display: flex;                 
-    justify-content: center; 
-    margin-left: -10px;     
+    justify-content: center;
+    align-items: center;  
+    margin-left: auto;  
+    margin-right: auto;
     gap: 10px;                     
-    width: 100%;
-    padding: 10px;
+    width: 85%;
+    padding: 7px;
     margin-top: 5px;
-    border: none;
-    border-radius: 5px;                    /* dark text */
-    font-size: 16px;
+    background-color: #000000;
+    border-radius: 9px;                    /* dark text */
+    font-size: 15px;
     cursor: pointer;
     transition: background-color 0.3s, color 0.3s;
   }
@@ -83,6 +85,7 @@ body {
 
   .login-form .sign-text {
     font-size: small;
+    margin-top: 10px;
   }
   .login-form .signup-btn{
     color: rgb(87, 211, 100);

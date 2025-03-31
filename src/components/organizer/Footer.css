@@ -1,0 +1,62 @@
+.footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #22543d;  /* Tailwind: bg-green-800 */
+    padding-top: 0.5rem;        /* py-2 */
+    padding-bottom: 0.5rem;
+    display: flex;              /* flex */
+    justify-content: center;    /* justify-center */
+    gap: 1.5rem;                /* space-x-6 */
+    color: white;               /* text-white */
+    z-index: 50;
+  }
+  
+  .button-wrapper {
+    position: relative;
+    background: none;
+    padding: 10px;         /* relative container for tooltip */
+  }
+  
+  .icon-button {
+    background-color: #AED36C;  /* Tailwind: bg-green-700 */
+    width: 3rem;              /* larger size for icon clarity */
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;      /* fully rounded */
+    border: none;
+    cursor: pointer;
+    font-size: 1.5rem;          /* size of the icon */
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .icon-button:hover {
+    background-color: #48bb78;  /* Tailwind: hover:bg-green-500 */
+    transform: translateY(-2px); /* lift on hover */
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+  }
+  
+  .tooltip {
+    position: absolute;
+    bottom: 100%;
+    margin-bottom: 0.5rem;        /* mb-2 */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #AED36C;    /* bg-green-700 */
+    color: white;
+    font-size: 0.75rem;           /* text-xs */
+    padding: 0.25rem 0.5rem;      /* px-2 py-1 */
+    border-radius: 0.25rem;       /* rounded */
+    opacity: 0;                   /* start hidden */
+    transition: opacity 0.3s ease;
+    white-space: nowrap;          /* no line break */
+  }
+  
+  .button-wrapper:hover .tooltip {
+    opacity: 1;                   /* show tooltip on hover */
+  }
+  

@@ -2,8 +2,10 @@ import Home from "./components/home/Home";
 import Events from "./components/events/Events";
 import AddNew from "./components/organizer/AddNew";
 import RegisterEvent from "./components/user/RegisterEvent";
-import Login from "./components/organizer/Login.jsx";
-import SignUp from "./components/organizer/Signup";
+import Login from "./components/organizer/login page/Login.jsx";
+import SignUp from "./components/organizer/signup page/Signup.jsx";
+import Footer from "./components/organizer/Footer.jsx";
+
 // import { useEffect, useState } from "react";
 // import { supabase } from "./services/supabaseClient.jsx";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
@@ -51,6 +53,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
           <Route path="/organizerlogin" element={<Login />} />
           <Route path="/registerevent" element={<RegisterEvent />} />
           <Route path="/organizersignup" element={<SignUp />} />
+          <Route path="/Footer"element={<Footer />} />
         </Routes>
       </BrowserRouter>
     </>

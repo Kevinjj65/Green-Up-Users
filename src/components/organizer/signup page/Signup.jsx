@@ -4,10 +4,10 @@ import "./SignUp.css";
 import { FcGoogle } from "react-icons/fc";
 
 export default function SignUp() {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phone_number, setPhone] = useState("");
   const navigate = useNavigate();
   const [agreeTerms, setAgreeTerms] = useState(false);
 
@@ -17,12 +17,12 @@ export default function SignUp() {
       alert("You must agree to the Terms and Conditions to proceed.");
       return;
     }
-    console.log("First Name:", firstName, "Last Name:", lastName, "Email:", email, "Password:", password);
+    console.log("Name:", name, "Email:", email, "Password:", password, "Phone Number:", phone_number);
   };
 
   const handleGooglesignup = () => {
     console.log("Signing up with Google...");
-    // Add Google authentication logic here
+    // Google authentication logic 
   };
 
   const handleLoginClick = () => {
@@ -36,22 +36,13 @@ export default function SignUp() {
     <div className="signup-container">
       <h1 className="signup-title">Be an Organizer Now!</h1>
       <form onSubmit={handlesignup} className="signup-form">
-        <div className="name-fields">
           <input
             type="text"
-            placeholder="First Name"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
+            placeholder="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             required
           />
-          <input
-            type="text"
-            placeholder="Last Name"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            required
-          />
-        </div>
         <input
           type="email"
           placeholder="Email"
@@ -64,6 +55,13 @@ export default function SignUp() {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <input
+          type="tel"
+          placeholder="Phone"
+          value={phone_number}
+          onChange={(e) => setPhone(e.target.value)}
           required
         />
          <div className="terms-container">

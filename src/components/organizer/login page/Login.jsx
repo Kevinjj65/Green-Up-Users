@@ -5,12 +5,12 @@ import  { useState } from "react";
 import "./Login.css";
 import { FcGoogle } from "react-icons/fc";
 export default function Login() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const handleLogin = (e) => {
     e.preventDefault();
-    console.log("Username:", username, "Password:", password);
+    console.log("Email:", email, "Password:", password);
   };
   const handleGoogleLogin = () => {
     console.log("Signing in with Google...");
@@ -25,9 +25,9 @@ export default function Login() {
       <form onSubmit={handleLogin} className="login-form">
         <input
         type="text"
-        placeholder="Username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
         required/>
         <input
         type="password"
