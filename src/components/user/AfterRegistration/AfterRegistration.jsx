@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";  // ✅ Import useNavigate
+import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../../../services/supabaseClient";
 import { QRCodeCanvas } from "qrcode.react";
-import Footer from "../Footer/Footer";
 
 const AfterRegistration = () => {
   const { eventId, attendeeId } = useParams();
-  const navigate = useNavigate(); // ✅ Initialize navigate
+  const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [eventAddress, setEventAddress] = useState("Fetching location...");
 
@@ -23,15 +22,19 @@ const AfterRegistration = () => {
       try {
         const { data, error } = await supabase
           .from("events")
-          .select("*")
+          .select("title, description, latitude, longitude")  // ✅ Select only necessary fields
           .eq("id", eventId)
           .single();
 
         if (error) throw error;
         setEvent(data);
 
-        // Convert latitude/longitude to address
-        fetchAddressFromCoordinates(data.latitude, data.longitude);
+        // ✅ Fetch address only if coordinates exist
+        if (data.latitude && data.longitude) {
+          fetchAddressFromCoordinates(data.latitude, data.longitude);
+        } else {
+          setEventAddress("Location data unavailable");
+        }
       } catch (error) {
         console.error("Error fetching event details:", error.message);
       }
@@ -42,21 +45,28 @@ const AfterRegistration = () => {
 
   async function fetchAddressFromCoordinates(lat, lon) {
     const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+    if (!API_KEY) {
+      console.error("Error: Google Maps API Key is missing!");
+      setEventAddress("Location service unavailable");
+      return;
+    }
+
     const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=${API_KEY}`;
 
     try {
       const response = await fetch(url);
       const result = await response.json();
+
       if (result.status === "OK") {
-        const address = result.results[0]?.formatted_address || "Location not found";
-        setEventAddress(address);
+        setEventAddress(result.results[0]?.formatted_address || "Location not found");
       } else {
-        console.error("Geocoding failed:", result.status);
-        setEventAddress("Unknown Location");
+        console.error("Geocoding failed:", result.status, result.error_message);
+        setEventAddress("Unable to determine location");
       }
     } catch (error) {
       console.error("Error fetching address:", error);
-      setEventAddress("Unknown Location");
+      setEventAddress("Error retrieving location");
     }
   }
 
@@ -81,7 +91,6 @@ const AfterRegistration = () => {
         <p className="text-lg font-semibold">Your QR Code</p>
         <QRCodeCanvas value={qrCodeValue} size={200} />
       </div>
-      <Footer />
     </div>
   );
 };
