@@ -1,0 +1,143 @@
+import { useState, useEffect } from "react";
+import { supabase } from "../../services/supabaseClient";
+import OrganizerFooter from "./OrganizerFooter";
+import { FaEdit } from "react-icons/fa"; // Import Edit Icon
+
+const OrganizerProfile = () => {
+  const [profile, setProfile] = useState({
+    name: "",
+    email_id: "",
+    phone_number: "",
+    is_verified: false,
+    fee_payment: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      setLoading(true);
+
+      // ✅ Get logged-in user
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError || !authData?.user) {
+        console.error("Authentication error:", authError?.message);
+        setLoading(false);
+        return;
+      }
+
+      const userEmail = authData.user.email.toLowerCase(); // Ensure case consistency
+      console.log("User Email:", userEmail);
+
+      // ✅ Fetch organizer profile
+      const { data, error: profileError } = await supabase
+        .from("organizers")
+        .select("id, name, email_id, phone_number, is_verified, fee_payment")
+        .ilike("email_id", userEmail) // Case-insensitive match
+        .single();
+
+      if (profileError) {
+        console.error("Error fetching profile:", profileError.message);
+      } else {
+        setProfile(data);
+      }
+
+      setLoading(false);
+    };
+
+    fetchProfile();
+  }, []);
+
+  const handleChange = (e) => {
+    setProfile({ ...profile, [e.target.name]: e.target.value });
+  };
+
+  const handleSave = async () => {
+    setLoading(true);
+
+    const { error } = await supabase
+      .from("organizers")
+      .update({
+        name: profile.name,
+        phone_number: profile.phone_number,
+        fee_payment: profile.fee_payment,
+      })
+      .eq("id", profile.id);
+
+    if (!error) {
+      setEditMode(false);
+      alert("Profile updated successfully!");
+    } else {
+      alert("Error updating profile.");
+    }
+
+    setLoading(false);
+  };
+
+  return (
+    <div className="max-w-xl mx-auto mt-10 p-6 bg-gray-900 text-white shadow-md rounded-lg">
+      {/* ✅ Edit Icon */}
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-semibold">Organizer Profile</h1>
+        <button onClick={() => setEditMode(!editMode)} className="text-green-400 hover:text-green-500">
+          <FaEdit size={24} />
+        </button>
+      </div>
+
+      {/* ✅ Profile Inputs */}
+      <div className="space-y-3">
+        <input
+          type="text"
+          name="name"
+          value={profile.name}
+          onChange={handleChange}
+          disabled={!editMode}
+          className="w-full p-2 border rounded-md bg-gray-800 text-white disabled:opacity-50"
+          placeholder="Name"
+        />
+        <input
+          type="email"
+          name="email_id"
+          value={profile.email_id}
+          disabled
+          className="w-full p-2 border rounded-md bg-gray-700 text-gray-400"
+        />
+        <input
+          type="text"
+          name="phone_number"
+          value={profile.phone_number}
+          onChange={handleChange}
+          disabled={!editMode}
+          className="w-full p-2 border rounded-md bg-gray-800 text-white disabled:opacity-50"
+          placeholder="Phone Number"
+        />
+        <input
+          type="text"
+          name="fee_payment"
+          value={profile.fee_payment}
+          onChange={handleChange}
+          disabled={!editMode}
+          className="w-full p-2 border rounded-md bg-gray-800 text-white disabled:opacity-50"
+          placeholder="Fee Payment Status"
+        />
+      </div>
+
+      {/* ✅ Save Button */}
+      {editMode && (
+        <button
+          onClick={handleSave}
+          className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md w-full"
+          disabled={loading}
+        >
+          {loading ? "Saving..." : "Save Changes"}
+        </button>
+      )}
+
+      {/* ✅ Footer */}
+      <OrganizerFooter />
+    </div>
+  );
+};
+
+export default OrganizerProfile;

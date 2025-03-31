@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { supabase } from "./../../services/supabaseClient";
-import Footer from "./Footer";
+import OrganizerFooter from "./OrganizerFooter";
 import "./Organizer.css";
 
 function AddNew() {
@@ -101,25 +101,37 @@ function AddNew() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-
-        if (!eventData.image_url) {
-            alert("Please upload an image before submitting.");
-            setLoading(false);
-            return;
-        }
-
-        // Get the logged-in user's ID
-        const { data: user, error: authError } = await supabase.auth.getUser();
-        if (authError || !user?.user) {
+    
+        // ✅ Get authenticated user from Supabase Auth
+        const { data: authData, error: authError } = await supabase.auth.getUser();
+    
+        if (authError || !authData?.user) {
             alert("User not authenticated. Please log in.");
             setLoading(false);
             return;
         }
-
-        const userId = user.user.id;
-
-        console.log("Event Data before submission:", eventData);
-
+    
+        const userEmail = authData.user.email; // ✅ Get user email
+    
+        // ✅ Fetch organizer ID using email (not user ID)
+        const { data: organizer, error: organizerError } = await supabase
+            .from("organizers")
+            .select("id")
+            .eq("email_id", userEmail)
+            .single();
+    
+        if (organizerError || !organizer) {
+            console.error("Organizer does not exist:", organizerError);
+            alert("You are not registered as an organizer. Please sign up first.");
+            setLoading(false);
+            return;
+        }
+    
+        const organizerId = organizer.id; // ✅ Correct organizer ID
+    
+        console.log("Organizer ID found:", organizerId);
+    
+        // ✅ Proceed with event insertion
         const { error } = await supabase
             .from("events")
             .insert([
@@ -129,17 +141,17 @@ function AddNew() {
                     date: eventData.date,
                     start_time: eventData.start_time,
                     end_time: eventData.end_time,
-                    latitude: eventData.latitude ? Number(eventData.latitude) : null, // Auto-filled
-                    longitude: eventData.longitude ? Number(eventData.longitude) : null, // Auto-filled
+                    latitude: Number(eventData.latitude) || null,
+                    longitude: Number(eventData.longitude) || null,
                     max_participants: Number(eventData.max_participants),
                     reward_points: Number(eventData.reward_points),
                     images: eventData.image_url,
-                    organizer_id: userId
+                    organizer_id: organizerId // ✅ Use correct organizer ID
                 }
             ]);
-
+    
         setLoading(false);
-
+    
         if (error) {
             console.error("Error inserting event:", error);
             alert("Error adding event.");
@@ -147,7 +159,8 @@ function AddNew() {
             alert("Event added successfully!");
         }
     };
-
+    
+    
     return (
         <div className="container">
             <main>
@@ -181,7 +194,7 @@ function AddNew() {
                     </button>
                 </form>
             </main>
-            <Footer />
+            <OrganizerFooter />
         </div>
     );
 }

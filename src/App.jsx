@@ -9,7 +9,10 @@ import LLogin from '././components/user/Login/login.jsx'
 import SSignup from '././components/user/Login/Signup.jsx'
 import OrgMaps from '././components/organizer/OrganizerEventsMaps.jsx';
 import UserMaps from './components/user/Map/EventsMap.jsx';
-
+import OrganizerEvents from "./components/organizer/OrganizerEvents.jsx";
+import OrganizerProfile from "./components/organizer/OrganizerProfile.jsx";
+import EventDetailsOrg from "./components/organizer/EventDetailsOrg.jsx";
+//import OrganizerEventsMap from "././components/organizer/OrganizerEventsMaps.jsx";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import AfterRegistration from "./components/user/AfterRegistration/AfterRegistration";
 import UserProfile from "./components/user/UserProfile/UserProfile.jsx";
@@ -26,18 +29,20 @@ import UserProfile from "./components/user/UserProfile/UserProfile.jsx";
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/events" element={<Events />} />
-          <Route path="/organizenew" element={<AddNew />} />
-          <Route path="/organizerlogin" element={<Login />} />
           <Route path="/userlogin" element={<LLogin />} />
           <Route path="/usersignup" element={<SSignup />} />
-          <Route path="/orgmaps" element={<OrgMaps />} />
           <Route path="/usermaps" element={<UserMaps />} />
-          <Route path="/registerevent/:id" element={<RegisterEvent />} />
-          <Route path="/organizersignup" element={<SignUp />} />
-          <Route path="/afterregistration/:eventId/:userId" element={<AfterRegistration/>} />
-
-          <Route path="/scan" element={<Scan />} />
           <Route path="/userprofile" element={<UserProfile />} />
+          <Route path="/registerevent/:id" element={<RegisterEvent />} />
+          <Route path="/afterregistration/:eventId/:userId" element={<AfterRegistration/>} />
+          <Route path="/organizer/profile" element={<OrganizerProfile />} />
+        <Route path="/organizer/events" element={<OrganizerEvents />} />
+        <Route path="/organizer/event/:id" element={<EventDetailsOrg />} />
+        <Route path="/organizenew" element={<AddNew />} />
+        <Route path="/organizerlogin" element={<Login />} />
+        <Route path="/orgmaps" element={<OrgMaps />} />
+        <Route path="/organizersignup" element={<SignUp />} />
+          <Route path="/scan" element={<Scan />} />
         </Routes>
       </BrowserRouter>
     </>
