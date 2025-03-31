@@ -16,6 +16,7 @@ import EventDetailsOrg from "./components/organizer/EventDetailsOrg.jsx";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import AfterRegistration from "./components/user/AfterRegistration/AfterRegistration";
 import UserProfile from "./components/user/UserProfile/UserProfile.jsx";
+import RegisteredEvents from "./components/user/RegisteredEvents/RegisteredEvents.jsx";
 
  function App() {
 

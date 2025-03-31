@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "./../../../services/supabaseClient";
 import { QRCodeCanvas } from "qrcode.react";
 import { useNavigate } from "react-router-dom";
+import Footer from "../Footer/Footer";
 
 const AfterRegistration = () => {
     const { eventId, attendeeId } = useParams();
@@ -80,6 +81,7 @@ const AfterRegistration = () => {
                 <p className="text-lg font-semibold">Your QR Code</p>
                 <QRCodeCanvas value={JSON.stringify({ attendee_id: attendeeId, event_id: eventId })} size={200} />
             </div>
+            <Footer />
         </div>
     );
 };
