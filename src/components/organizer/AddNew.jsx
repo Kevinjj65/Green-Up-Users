@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { supabase } from "./../../services/supabaseClient";
 import OrganizerFooter from "./OrganizerFooter";
-import "./Organizer.css";
 
 function AddNew() {
     const [eventData, setEventData] = useState({
@@ -15,7 +14,7 @@ function AddNew() {
         longitude: null,
         max_participants: "",
         reward_points: "",
-        image_url: "" // Stores uploaded image URL
+        image_url: ""
     });
 
     const [loading, setLoading] = useState(false);
@@ -29,7 +28,6 @@ function AddNew() {
             [name]: value
         });
 
-        // If location is updated, fetch coordinates
         if (name === "location") {
             fetchCoordinates(value);
         }
@@ -48,9 +46,6 @@ function AddNew() {
                     latitude: data[0].lat,
                     longitude: data[0].lon
                 }));
-                console.log("Coordinates found:", data[0].lat, data[0].lon);
-            } else {
-                console.warn("No coordinates found for location:", address);
             }
         } catch (error) {
             console.error("Error fetching coordinates:", error);
@@ -63,7 +58,6 @@ function AddNew() {
         setUploadStatus(`File selected: ${file.name}`);
     };
 
-    // Uploads the file to Supabase Storage
     const handleUpload = async () => {
         if (!selectedFile) {
             setUploadStatus("No file selected.");
@@ -71,28 +65,24 @@ function AddNew() {
         }
 
         setUploadStatus("Uploading...");
-        const fileName = `${Date.now()}_${selectedFile.name}`; // Unique filename
+        const fileName = `${Date.now()}_${selectedFile.name}`;
 
         const { data, error } = await supabase.storage
-            .from("event_images") // Ensure this is the correct bucket name
+            .from("event_images")
             .upload(fileName, selectedFile);
 
         if (error) {
-            console.error("Upload error:", error);
             setUploadStatus("Error uploading file.");
             return;
         }
 
-        // Retrieve the public URL
         const { data: urlData } = supabase.storage
             .from("event_images")
             .getPublicUrl(fileName);
 
-        const imageUrl = urlData.publicUrl;
-
         setEventData((prev) => ({
             ...prev,
-            image_url: imageUrl // Store in state
+            image_url: urlData.publicUrl
         }));
 
         setUploadStatus("Upload successful!");
@@ -102,7 +92,6 @@ function AddNew() {
         e.preventDefault();
         setLoading(true);
     
-        // ✅ Get authenticated user from Supabase Auth
         const { data: authData, error: authError } = await supabase.auth.getUser();
     
         if (authError || !authData?.user) {
@@ -111,9 +100,8 @@ function AddNew() {
             return;
         }
     
-        const userEmail = authData.user.email; // ✅ Get user email
+        const userEmail = authData.user.email;
     
-        // ✅ Fetch organizer ID using email (not user ID)
         const { data: organizer, error: organizerError } = await supabase
             .from("organizers")
             .select("id")
@@ -121,17 +109,13 @@ function AddNew() {
             .single();
     
         if (organizerError || !organizer) {
-            console.error("Organizer does not exist:", organizerError);
             alert("You are not registered as an organizer. Please sign up first.");
             setLoading(false);
             return;
         }
     
-        const organizerId = organizer.id; // ✅ Correct organizer ID
+        const organizerId = organizer.id;
     
-        console.log("Organizer ID found:", organizerId);
-    
-        // ✅ Proceed with event insertion
         const { error } = await supabase
             .from("events")
             .insert([
@@ -146,50 +130,50 @@ function AddNew() {
                     max_participants: Number(eventData.max_participants),
                     reward_points: Number(eventData.reward_points),
                     images: eventData.image_url,
-                    organizer_id: organizerId // ✅ Use correct organizer ID
+                    organizer_id: organizerId
                 }
             ]);
     
         setLoading(false);
     
         if (error) {
-            console.error("Error inserting event:", error);
             alert("Error adding event.");
         } else {
             alert("Event added successfully!");
         }
     };
     
-    
     return (
-        <div className="container">
-            <main>
-                <h1>Be an Organizer Now</h1>
+        <div className="flex flex-col min-h-screen bg-gray-900 text-gray-100 font-light">
+            <main className="p-10 flex-1">
+                <h1 className="text-lg mb-7">Be an Organizer Now</h1>
                 <form onSubmit={handleSubmit}>
-                    <input className="input name" type="text" name="title" placeholder="Name of the Event" onChange={handleChange} required />
-                    <textarea className="input description" name="description" placeholder="Event Description" onChange={handleChange} required />
-                    <input className="input date" type="date" name="date" onChange={handleChange} required />
-                    <div className="time">
-                        <input className="input start" type="time" name="start_time" onChange={handleChange} required />
-                        <input className="input end" type="time" name="end_time" onChange={handleChange} required />
+                    <input className="bg-gray-200 text-gray-900 w-full rounded px-3 h-[37px] text-xs mb-6" type="text" name="title" placeholder="Name of the Event" onChange={handleChange} required />
+                    <textarea className="bg-gray-200 text-gray-900 w-full rounded px-3 h-[37px] text-xs mb-6" name="description" placeholder="Event Description" onChange={handleChange} required />
+                    <input className="bg-gray-200 text-gray-900 w-full rounded px-3 h-[37px] text-xs mb-6" type="date" name="date" onChange={handleChange} required />
+                    
+                    <div className="flex justify-between">
+                        <input className="bg-gray-200 text-gray-900 w-[48%] rounded px-3 h-[37px] text-xs mb-6" type="time" name="start_time" onChange={handleChange} required />
+                        <input className="bg-gray-200 text-gray-900 w-[48%] rounded px-3 h-[37px] text-xs mb-6" type="time" name="end_time" onChange={handleChange} required />
                     </div>
-                    <input className="input loc" type="text" name="location" placeholder="Location (City, Address)" onChange={handleChange} required />
 
-                    <input className="input nop" type="number" name="max_participants" placeholder="Max No. of Participants" onChange={handleChange} required />
-                    <input className="input rewpts" type="number" name="reward_points" placeholder="Allotted Reward Points" onChange={handleChange} required />
+                    <input className="bg-gray-200 text-gray-900 w-full rounded px-3 h-[37px] text-xs mb-6" type="text" name="location" placeholder="Location (City, Address)" onChange={handleChange} required />
 
-                    {/* File Upload Section */}
-                    <input type="file" className="input file-upload" onChange={handleFileChange} />
-                    <button type="button" className="upload-button" onClick={handleUpload}>
+                    <input className="bg-gray-200 text-gray-900 w-full rounded px-3 h-[37px] text-xs mb-6" type="number" name="max_participants" placeholder="Max No. of Participants" onChange={handleChange} required />
+                    <input className="bg-gray-200 text-gray-900 w-full rounded px-3 h-[37px] text-xs mb-6" type="number" name="reward_points" placeholder="Allotted Reward Points" onChange={handleChange} required />
+
+                    <input type="file" className="mb-4" onChange={handleFileChange} />
+                    <button type="button" className="bg-blue-500 px-4 py-2 rounded text-white" onClick={handleUpload}>
                         Upload Image
                     </button>
                     {uploadStatus && <p>{uploadStatus}</p>}
 
-                    <div className="check">
-                        <input className="checkbox" type="checkbox" required />
-                        <span className="check-text">I agree to Terms & Conditions</span>
+                    <div className="flex items-center py-5">
+                        <input className="mr-2" type="checkbox" required />
+                        <span className="text-xs">I agree to Terms & Conditions</span>
                     </div>
-                    <button className="btn1 regbtn" type="submit" disabled={loading}>
+                    
+                    <button className="bg-green-400 text-gray-900 w-full h-[37px] text-xs rounded" type="submit" disabled={loading}>
                         {loading ? "Registering..." : "Register Now"}
                     </button>
                 </form>
