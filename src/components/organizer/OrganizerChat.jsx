@@ -1,23 +1,28 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "../../services/supabaseClient";
 import { useParams, useNavigate } from "react-router-dom";
-import Footer from './OrganizerFooter'
+import OrganizerFooter from "./OrganizerFooter";
 
 const OrganizerChat = () => {
   const { eventId, attendeeId } = useParams();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState("");
   const [organizerId, setOrganizerId] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
-  const messagesEndRef = useRef(null); // Ref for scrolling
 
-  // Fetch logged-in organizer's ID
+  const scrollToBottom = () => {
+    const messagesContainer = document.getElementById("messages-container");
+    if (messagesContainer) {
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+  };
+
   useEffect(() => {
     const fetchOrganizerId = async () => {
       const { data: authData, error: authError } = await supabase.auth.getUser();
       if (authError || !authData?.user) {
-        console.log("User not authenticated");
+        console.error("User not authenticated:", authError?.message);
         return;
       }
 
@@ -29,7 +34,7 @@ const OrganizerChat = () => {
         .single();
 
       if (organizerError || !organizer) {
-        console.log("Organizer not found");
+        console.error("Organizer not found:", organizerError?.message);
         return;
       }
 
@@ -39,7 +44,6 @@ const OrganizerChat = () => {
     fetchOrganizerId();
   }, []);
 
-  // Fetch chat messages with sender names
   useEffect(() => {
     const fetchMessages = async () => {
       if (!organizerId || !eventId || !attendeeId) return;
@@ -55,74 +59,41 @@ const OrganizerChat = () => {
           .eq("organizer_id", organizerId)
           .order("created_at", { ascending: true });
 
-        if (messagesError) {
-          console.error("Error fetching messages:", messagesError);
-          return;
-        }
+        if (messagesError) throw new Error("Error fetching messages: " + messagesError.message);
 
         if (!messagesData.length) {
           setMessages([]);
           return;
         }
 
-        // Extract attendee_ids and organizer_ids
-        const attendeeIds = [
-          ...new Set(
-            messagesData.filter((msg) => msg.sent_by === true).map((msg) => msg.attendee_id)
-          ),
-        ];
-        const organizerIds = [
-          ...new Set(
-            messagesData.filter((msg) => msg.sent_by === false).map((msg) => msg.organizer_id)
-          ),
-        ];
+        const attendeeIds = [...new Set(messagesData.filter((msg) => msg.sent_by).map((msg) => msg.attendee_id))];
+        const organizerIds = [...new Set(messagesData.filter((msg) => !msg.sent_by).map((msg) => msg.organizer_id))];
 
-        // Fetch names for participants (attendees)
-        let participantsData = [];
-        if (attendeeIds.length > 0) {
-          const { data: participants, error: participantsError } = await supabase
-            .from("participants")
-            .select("id, name")
-            .in("id", attendeeIds);
+        const { data: participantsData, error: participantsError } = await supabase
+          .from("participants")
+          .select("id, name")
+          .in("id", attendeeIds);
+        if (participantsError) console.error("Error fetching participants:", participantsError.message);
 
-          if (participantsError) {
-            console.error("Error fetching participant names:", participantsError);
-          } else {
-            participantsData = participants;
-          }
-        }
+        const { data: organizersData, error: organizersError } = await supabase
+          .from("organizers")
+          .select("id, name")
+          .in("id", organizerIds);
+        if (organizersError) console.error("Error fetching organizers:", organizersError.message);
 
-        // Fetch names for organizers
-        let organizersData = [];
-        if (organizerIds.length > 0) {
-          const { data: organizers, error: organizersError } = await supabase
-            .from("organizers")
-            .select("id, name")
-            .in("id", organizerIds);
-
-          if (organizersError) {
-            console.error("Error fetching organizer names:", organizersError);
-          } else {
-            organizersData = organizers;
-          }
-        }
-
-        // Map messages to include sender names
         const messagesWithNames = messagesData.map((message) => {
-          if (message.sent_by === true) {
-            // Message sent by attendee
-            const participant = participantsData.find((p) => p.id === message.attendee_id);
+          if (message.sent_by) {
+            const participant = participantsData?.find((p) => p.id === message.attendee_id);
             return { ...message, senderName: participant?.name || "Unknown Attendee" };
           } else {
-            // Message sent by organizer
-            const organizer = organizersData.find((o) => o.id === message.organizer_id);
+            const organizer = organizersData?.find((o) => o.id === message.organizer_id);
             return { ...message, senderName: organizer?.name || "Unknown Organizer" };
           }
         });
 
         setMessages(messagesWithNames);
       } catch (error) {
-        console.error("Error fetching messages:", error);
+        console.error("Error in fetchMessages:", error.message);
       } finally {
         setLoading(false);
       }
@@ -131,85 +102,110 @@ const OrganizerChat = () => {
     fetchMessages();
   }, [organizerId, eventId, attendeeId]);
 
-  // Real-time subscription to messages
   useEffect(() => {
-    const messageSubscription = supabase
-      .channel(`event:${eventId}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async (payload) => {
-        const newMessage = payload.new;
-        let senderName = 'Unknown';
+    if (!eventId || !organizerId || !attendeeId) return;
 
-        if (newMessage.sent_by === true) {
-          const { data: attendee, error: attendeeError } = await supabase
-            .from("participants")
-            .select("name")
-            .eq("id", newMessage.attendee_id)
-            .single();
+    const channel = supabase
+      .channel(`messages:${eventId}:${attendeeId}:${organizerId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+          filter: `event_id=eq.${eventId}`,
+        },
+        async (payload) => {
+          const newMessage = payload.new;
 
-          if (attendeeError) {
-            console.error("Error fetching attendee name:", attendeeError);
-          } else {
-            senderName = attendee?.name || "Unknown Attendee";
+          if (
+            newMessage.event_id !== eventId ||
+            newMessage.attendee_id !== attendeeId ||
+            newMessage.organizer_id !== organizerId
+          ) {
+            return;
           }
-        } else {
-          const { data: organizer, error: organizerError } = await supabase
-            .from("organizers")
-            .select("name")
-            .eq("id", newMessage.organizer_id)
-            .single();
 
-          if (organizerError) {
-            console.error("Error fetching organizer name:", organizerError);
+          let senderName = "Unknown";
+          if (newMessage.sent_by) {
+            const { data: attendee, error } = await supabase
+              .from("participants")
+              .select("name")
+              .eq("id", newMessage.attendee_id)
+              .single();
+            if (error) console.error("Error fetching attendee name:", error.message);
+            senderName = attendee?.name || "Unknown Attendee";
           } else {
+            const { data: organizer, error } = await supabase
+              .from("organizers")
+              .select("name")
+              .eq("id", newMessage.organizer_id)
+              .single();
+            if (error) console.error("Error fetching organizer name:", error.message);
             senderName = organizer?.name || "Unknown Organizer";
           }
-        }
 
-        const messageWithName = { ...newMessage, senderName };
-        setMessages((prevMessages) => [...prevMessages, messageWithName]);
-      })
-      .subscribe();
+          setMessages((prevMessages) => {
+            if (prevMessages.some((msg) => msg.id === newMessage.id)) return prevMessages;
+            return [...prevMessages, { ...newMessage, senderName }];
+          });
+        }
+      )
+      .subscribe((status) => {
+        console.log("Subscription status:", status);
+      });
 
     return () => {
-      messageSubscription.unsubscribe();
+      supabase.removeChannel(channel);
     };
-  }, [eventId]);
+  }, [eventId, organizerId, attendeeId]);
 
-  // Scroll to the bottom of the messages container
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages]); // Trigger scroll whenever messages change
+    scrollToBottom();
+  }, [messages]);
 
-  // Send message function
   const handleSendMessage = async () => {
-    if (!messageInput.trim() || !organizerId) return;
+    if (!messageInput.trim() | !organizerId) return;
+
+    const tempId = `temp-${Date.now()}`;
+    const newMessage = {
+      event_id: eventId,
+      attendee_id: attendeeId,
+      organizer_id: organizerId,
+      message: messageInput,
+      sent_by: false,
+      created_at: new Date().toISOString(),
+      id: tempId,
+    };
+
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { ...newMessage, senderName: "You" },
+    ]);
+    setMessageInput("");
 
     const { data, error } = await supabase
       .from("messages")
-      .insert([{
-        event_id: eventId,
-        attendee_id: attendeeId,
-        organizer_id: organizerId,
-        message: messageInput,
-        sent_by: false,
-      }])
+      .insert([{ event_id: eventId, attendee_id: attendeeId, organizer_id: organizerId, message: messageInput, sent_by: false }])
       .select()
       .single();
 
     if (error) {
-      console.error("Error sending message:", error);
-    } else {
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { ...data, senderName: "You" },
-      ]);
-      setMessageInput("");
+      console.error("Error sending message:", error.message);
+      setMessages((prevMessages) => prevMessages.filter((msg) => msg.id !== tempId));
+    } else if (data) {
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) => (msg.id === tempId ? { ...data, senderName: "You" } : msg))
+      );
     }
   };
 
-  // Navigate back to the chat page
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter" && messageInput.trim()) {
+      handleSendMessage();
+    }
+  };
+
   const handleNavigateBack = () => {
     navigate(`/organizer/event/${eventId}/chat`);
   };
@@ -225,7 +221,11 @@ const OrganizerChat = () => {
 
       <h2>Chat with Attendee</h2>
 
-      <div className="messages-container h-[400px] overflow-y-auto p-4 bg-white shadow-md rounded-lg">
+      <div
+        id="messages-container"
+        className="messages-container"
+        style={{ maxHeight: "400px", overflowY: "auto" }}
+      >
         {loading ? (
           <p>Loading messages...</p>
         ) : (
@@ -234,7 +234,7 @@ const OrganizerChat = () => {
               messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`message mb-2 ${message.sent_by === false && message.organizer_id === organizerId ? 'text-right text-blue-500' : 'text-left text-gray-700'}`}
+                  className={`message mb-2 ${message.sent_by === false && message.organizer_id === organizerId ? "text-right text-blue-500" : "text-left text-gray-700"}`}
                 >
                   <p>
                     <strong>{message.senderName}:</strong> {message.message}
@@ -247,7 +247,6 @@ const OrganizerChat = () => {
             )}
           </div>
         )}
-        <div ref={messagesEndRef} /> {/* Invisible ref element to trigger scrolling */}
       </div>
 
       <div className="message-input-container mt-4">
@@ -255,17 +254,19 @@ const OrganizerChat = () => {
           type="text"
           value={messageInput}
           onChange={(e) => setMessageInput(e.target.value)}
+          onKeyPress={handleKeyPress}
           placeholder="Type a message..."
           className="p-2 border rounded-l-md w-full"
         />
         <button
           onClick={handleSendMessage}
-          className="px-4 py-2 bg-green-600 text-white rounded-r-md hover:bg-green-700 transition"
+          disabled={!messageInput.trim()}
+          className={`px-4 py-2 bg-green-600 text-white rounded-r-md transition ${!messageInput.trim() ? "opacity-50 cursor-not-allowed" : "hover:bg-green-700"}`}
         >
           Send
         </button>
       </div>
-      <Footer/>
+      <OrganizerFooter />
     </div>
   );
 };

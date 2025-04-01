@@ -10,10 +10,9 @@ const Chat = () => {
   const [messageInput, setMessageInput] = useState("");
   const [loading, setLoading] = useState(true);
   const [eventName, setEventName] = useState("");
-  const [currentUserRole, setCurrentUserRole] = useState(null); // "attendee" or "organizer"
-  const [currentUserId, setCurrentUserId] = useState(null); // ID from participants or organizers table
+  const [currentUserRole, setCurrentUserRole] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(null);
 
-  // Scroll to bottom of the messages container
   const scrollToBottom = () => {
     const messagesContainer = document.getElementById("messages-container");
     if (messagesContainer) {
@@ -21,18 +20,16 @@ const Chat = () => {
     }
   };
 
-  // Fetch logged-in user's role and ID
   useEffect(() => {
     const fetchCurrentUser = async () => {
       const { data: authData, error: authError } = await supabase.auth.getUser();
       if (authError || !authData?.user) {
-        console.error("User not authenticated");
+        console.error("User not authenticated:", authError?.message);
         return;
       }
 
       const userEmail = authData.user.email;
 
-      // Check if user is an attendee
       const { data: participantData, error: participantError } = await supabase
         .from("participants")
         .select("id")
@@ -45,7 +42,6 @@ const Chat = () => {
         return;
       }
 
-      // Check if user is an organizer
       const { data: organizerData, error: organizerError } = await supabase
         .from("organizers")
         .select("id")
@@ -61,7 +57,6 @@ const Chat = () => {
     fetchCurrentUser();
   }, []);
 
-  // Fetch event name based on eventId
   useEffect(() => {
     const fetchEventName = async () => {
       if (!eventId) return;
@@ -76,7 +71,7 @@ const Chat = () => {
         if (error) throw error;
         setEventName(data?.title || "Unknown Event");
       } catch (error) {
-        console.error("Error fetching event name:", error);
+        console.error("Error fetching event name:", error.message);
         setEventName("Unknown Event");
       }
     };
@@ -84,10 +79,9 @@ const Chat = () => {
     fetchEventName();
   }, [eventId]);
 
-  // Fetch messages and their sender names
   useEffect(() => {
     const fetchMessages = async () => {
-      if (!eventId) return;
+      if (!eventId || !attendeeId || !organizerId) return;
 
       setLoading(true);
 
@@ -104,19 +98,18 @@ const Chat = () => {
             organizer_id
           `)
           .eq("event_id", eventId)
+          .eq("attendee_id", attendeeId)
+          .eq("organizer_id", organizerId)
           .order("created_at", { ascending: true });
 
         if (messagesError) throw messagesError;
 
-        const attendeeIds = [...new Set(messagesData
-          .filter((msg) => msg.sent_by)
-          .map((msg) => msg.attendee_id)
-          .filter((id) => id))];
-        
-        const organizerIds = [...new Set(messagesData
-          .filter((msg) => !msg.sent_by)
-          .map((msg) => msg.organizer_id)
-          .filter((id) => id))];
+        const attendeeIds = [
+          ...new Set(messagesData.filter((msg) => msg.sent_by).map((msg) => msg.attendee_id).filter((id) => id)),
+        ];
+        const organizerIds = [
+          ...new Set(messagesData.filter((msg) => !msg.sent_by).map((msg) => msg.organizer_id).filter((id) => id)),
+        ];
 
         let participantsData = [];
         let organizersData = [];
@@ -153,66 +146,78 @@ const Chat = () => {
 
         setMessages(messagesWithNames);
       } catch (error) {
-        console.error("Error in fetchMessages:", error);
+        console.error("Error in fetchMessages:", error.message);
       } finally {
         setLoading(false);
       }
     };
 
     fetchMessages();
-  }, [eventId]);
+  }, [eventId, attendeeId, organizerId]);
 
-  // Real-time subscription to messages
   useEffect(() => {
+    if (!eventId || !attendeeId || !organizerId) return;
+
     const messageSubscription = supabase
-      .channel(`event:${eventId}`)  // Create a channel for this specific event
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async (payload) => {
-        const newMessage = payload.new;
+      .channel(`messages:${eventId}:${attendeeId}:${organizerId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+          filter: `event_id=eq.${eventId}`,
+        },
+        async (payload) => {
+          const newMessage = payload.new;
 
-        // Determine if the message is from an attendee or organizer
-        let senderName = 'Unknown';
-
-        if (newMessage.sent_by) {
-          // Fetch attendee name
-          const { data: attendee, error: attendeeError } = await supabase
-            .from("participants")
-            .select("name")
-            .eq("id", newMessage.attendee_id)
-            .single();
-
-          if (attendeeError) {
-            console.error("Error fetching attendee name:", attendeeError);
-          } else {
-            senderName = attendee?.name || "Unknown Attendee";
+          // Ensure the message belongs to this chat
+          if (
+            newMessage.event_id !== eventId ||
+            newMessage.attendee_id !== attendeeId ||
+            newMessage.organizer_id !== organizerId
+          ) {
+            return;
           }
-        } else {
-          // Fetch organizer name
-          const { data: organizer, error: organizerError } = await supabase
-            .from("organizers")
-            .select("name")
-            .eq("id", newMessage.organizer_id)
-            .single();
 
-          if (organizerError) {
-            console.error("Error fetching organizer name:", organizerError);
+          let senderName = "Unknown";
+          if (newMessage.sent_by) {
+            const { data: attendee, error: attendeeError } = await supabase
+              .from("participants")
+              .select("name")
+              .eq("id", newMessage.attendee_id)
+              .single();
+            if (attendeeError) console.error("Error fetching attendee name:", attendeeError.message);
+            senderName = attendee?.name || "Unknown Attendee";
           } else {
+            const { data: organizer, error: organizerError } = await supabase
+              .from("organizers")
+              .select("name")
+              .eq("id", newMessage.organizer_id)
+              .single();
+            if (organizerError) console.error("Error fetching organizer name:", organizerError.message);
             senderName = organizer?.name || "Unknown Organizer";
           }
+
+          setMessages((prevMessages) => {
+            // Prevent duplicates by checking message id
+            if (prevMessages.some((msg) => msg.id === newMessage.id)) return prevMessages;
+            return [...prevMessages, { ...newMessage, name: senderName }];
+          });
         }
+      )
+      .subscribe((status) => {
+        console.log("Subscription status:", status);
+      });
 
-        // Add the sender's name to the message and update state
-        const messageWithName = { ...newMessage, name: senderName };
-        setMessages((prevMessages) => [...prevMessages, messageWithName]);
-      })
-      .subscribe();
-
-    // Cleanup subscription on component unmount
     return () => {
-      messageSubscription.unsubscribe();  // Use unsubscribe() instead of removeSubscription()
+      supabase.removeChannel(messageSubscription);
     };
-  }, [eventId]);
+  }, [eventId, attendeeId, organizerId]);
 
-  const handleSendMessage = async () => {
+  const handleSendMessage = async (e) => {
+    if (e) e.preventDefault();
+
     if (!messageInput.trim() || !currentUserId || !currentUserRole) return;
 
     try {
@@ -229,50 +234,21 @@ const Chat = () => {
         newMessage.attendee_id = attendeeId;
       }
 
-      const { data: newMessageData, error: insertError } = await supabase
+      const { error: insertError } = await supabase
         .from("messages")
-        .insert([newMessage])
-        .select(`
-          id,
-          event_id,
-          attendee_id,
-          message,
-          created_at,
-          sent_by,
-          organizer_id
-        `)
-        .single();
+        .insert([newMessage]);
 
       if (insertError) throw insertError;
 
-      let name = "Unknown";
-      if (currentUserRole === "attendee") {
-        const { data, error } = await supabase
-          .from("participants")
-          .select("name")
-          .eq("id", currentUserId)
-          .single();
-        if (!error) name = data?.name || "Unknown";
-      } else {
-        const { data, error } = await supabase
-          .from("organizers")
-          .select("name")
-          .eq("id", currentUserId)
-          .single();
-        if (!error) name = data?.name || "Unknown";
-      }
-
-      const newMessageWithName = { ...newMessageData, name };
-      setMessages((prevMessages) => [...prevMessages, newMessageWithName]);
-      setMessageInput("");
+      setMessageInput(""); // Clear input after successful send
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error("Error sending message:", error.message);
     }
   };
 
   useEffect(() => {
-    scrollToBottom();  // Scroll to bottom on messages change
-  }, [messages]);  // Only re-run when messages change
+    scrollToBottom();
+  }, [messages]);
 
   return (
     <>
@@ -323,6 +299,7 @@ const Chat = () => {
             type="text"
             value={messageInput}
             onChange={(e) => setMessageInput(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && handleSendMessage(e)}
             placeholder="Type a message..."
           />
           <button onClick={handleSendMessage}>Send</button>
