@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { supabase } from "../../services/supabaseClient"; // Adjust path if needed
+import { supabase } from "../../../services/supabaseClient"; 
 import { useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 
