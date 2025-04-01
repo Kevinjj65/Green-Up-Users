@@ -1,70 +1,132 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Html5QrcodeScanner } from "html5-qrcode";
-import { supabase } from "../../services/supabaseClient";
-import { useParams } from "react-router-dom";
+import React, { useState } from "react";
+import jsQR from "jsqr";
+import { supabase } from "./../../services/supabaseClient";
 
-const QRScanner = () => {
-  const { eventId } = useParams();
-  const [message, setMessage] = useState(null);
-  const scannerRef = useRef(null);
+const QRScanner = ({ eventId }) => {
+  const [scanResult, setScanResult] = useState(null);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+  // Handle file upload for QR code scanning
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-    scanner.render(
-      async (decodedText) => {
-        handleScanSuccess(decodedText);
-        scanner.clear();
-      },
-      (errorMessage) => {
-        console.error("QR Scan Error:", errorMessage);
-      }
-    );
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const image = new Image();
+      image.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = image.width;
+        canvas.height = image.height;
+        ctx.drawImage(image, 0, 0);
 
-    scannerRef.current = scanner;
+        // Get image data and pass it to jsQR for decoding
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const qrCode = jsQR(imageData.data, canvas.width, canvas.height);
 
-    return () => scanner.clear();
-  }, []);
+        if (qrCode) {
+          try {
+            const scannedData = JSON.parse(qrCode.data); // Parse QR code data
+            if (scannedData.event_id !== eventId) {
+              setError("Scanned QR code does not match the event.");
+              setScanResult(null);
+              return;
+            }
 
-  const handleScanSuccess = async (decodedText) => {
-    const scanData = JSON.parse(decodedText);
-    const { attendee_id } = scanData;
+            setScanResult(scannedData);
+            setError(null);
 
-    const { data: existingEntry } = await supabase
-      .from("registrations")
-      .select("id, check_in_time, check_out_time")
-      .eq("attendee_id", attendee_id)
-      .eq("event_id", eventId)
-      .single();
+            // Process the check-in/check-out
+            handleCheckInOut(scannedData.attendee_id, scannedData.event_id);
+          } catch (err) {
+            setError("Invalid QR Code format.");
+            setScanResult(null);
+          }
+        } else {
+          setError("No QR code found in the uploaded file.");
+          setScanResult(null);
+        }
+      };
+      image.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
 
-    const timestamp = new Date().toISOString();
+  // Function to handle check-in/check-out
+  const handleCheckInOut = async (attendeeId, eventId) => {
+    if (!attendeeId || !eventId) {
+      setError("Invalid QR Code: Missing attendeeId or eventId.");
+      return;
+    }
 
-    if (existingEntry && !existingEntry.check_out_time) {
-      await supabase
+    try {
+      const { data, error } = await supabase
         .from("registrations")
-        .update({ check_out_time: timestamp })
-        .eq("id", existingEntry.id);
-      showPopup(`✅ Checked out at ${new Date(timestamp).toLocaleTimeString()}`);
-    } else {
-      await supabase.from("registrations").insert({
-        attendee_id,
-        event_id: eventId,
-        check_in_time: timestamp,
-      });
-      showPopup(`✅ Checked in at ${new Date(timestamp).toLocaleTimeString()}`);
+        .select("check_in_time, check_out_time")
+        .eq("attendee_id", attendeeId)
+        .eq("event_id", eventId)
+        .single();
+
+      if (error) {
+        setError("Error fetching registration details.");
+        return;
+      }
+
+      const currentTime = new Date().toISOString();
+
+      if (!data.check_in_time) {
+        // Check-in
+        await supabase
+          .from("registrations")
+          .update({ check_in_time: currentTime })
+          .eq("attendee_id", attendeeId)
+          .eq("event_id", eventId);
+        setScanResult((prev) => ({
+          ...prev,
+          check_in_time: currentTime,
+        }));
+      } else if (!data.check_out_time) {
+        // Check-out
+        await supabase
+          .from("registrations")
+          .update({ check_out_time: currentTime })
+          .eq("attendee_id", attendeeId)
+          .eq("event_id", eventId);
+        setScanResult((prev) => ({
+          ...prev,
+          check_out_time: currentTime,
+        }));
+      } else {
+        setError("Already checked out.");
+      }
+    } catch (err) {
+      setError("Database update failed.");
     }
   };
 
-  const showPopup = (msg) => {
-    setMessage(msg);
-    setTimeout(() => setMessage(null), 3000);
-  };
-
   return (
-    <div className="p-6">
-      <h2 className="text-lg font-bold">Scan QR Code</h2>
-      <div id="reader"></div>
-      {message && <div className="mt-4 text-green-600">{message}</div>}
+    <div className="flex flex-col items-center">
+      <h2 className="text-xl font-semibold mt-4">QR Code Scanner</h2>
+
+      {/* File Upload for QR Code */}
+      <input
+        type="file"
+        accept="image/*"
+        onChange={handleFileUpload}
+        className="my-4"
+      />
+
+      {/* Error or Success Message */}
+      {error && <p className="text-red-500">{error}</p>}
+
+      {/* Display entire scanned QR code data */}
+      {scanResult && (
+        <div className="mt-4">
+          <p className="font-semibold">Scanned QR Code Data:</p>
+          <pre>{JSON.stringify(scanResult, null, 2)}</pre>
+        </div>
+      )}
     </div>
   );
 };

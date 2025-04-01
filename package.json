@@ -17,6 +17,7 @@
     "autoprefixer": "^10.4.21",
     "green-up-users": "file:",
     "html5-qrcode": "^2.3.8",
+    "jsqr": "^1.4.0",
     "leaflet": "^1.9.4",
     "olamaps-web-sdk": "^1.1.2",
     "postcss": "^8.5.3",

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../../../services/supabaseClient";
 import { QRCodeCanvas } from "qrcode.react";
+import Footer from "../Footer/Footer";
 
 const AfterRegistration = () => {
   const { eventId, attendeeId } = useParams();
@@ -9,27 +10,28 @@ const AfterRegistration = () => {
   const [event, setEvent] = useState(null);
   const [eventAddress, setEventAddress] = useState("Fetching location...");
 
-  // Generate QR Code Value as JSON string
-  const qrCodeValue = JSON.stringify({ attendee_id: attendeeId, event_id: eventId });
+  console.log("Received eventId:", eventId, "attendeeId:", attendeeId);
+
+  useEffect(() => {
+    if (!eventId || !attendeeId) {
+      console.error("Error: Missing eventId or attendeeId in the URL.");
+    }
+  }, [eventId, attendeeId]);
 
   useEffect(() => {
     const fetchEventDetails = async () => {
-      if (!eventId) {
-        console.error("Error: eventId is undefined");
-        return;
-      }
+      if (!eventId) return;
 
       try {
         const { data, error } = await supabase
           .from("events")
-          .select("title, description, latitude, longitude")  // ✅ Select only necessary fields
+          .select("title, description, latitude, longitude")
           .eq("id", eventId)
           .single();
 
         if (error) throw error;
         setEvent(data);
 
-        // ✅ Fetch address only if coordinates exist
         if (data.latitude && data.longitude) {
           fetchAddressFromCoordinates(data.latitude, data.longitude);
         } else {
@@ -74,9 +76,8 @@ const AfterRegistration = () => {
 
   return (
     <div className="flex flex-col items-center">
-      {/* ✅ Back Button */}
       <button
-        onClick={() => navigate("/events")} // ✅ Navigate back to Events page
+        onClick={() => navigate("/events")}
         className="self-start ml-4 mt-4 px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 transition"
       >
         ← Back to Events
@@ -89,8 +90,10 @@ const AfterRegistration = () => {
       {/* QR Code Display */}
       <div className="mt-6 p-4 border border-gray-300 rounded">
         <p className="text-lg font-semibold">Your QR Code</p>
-        <QRCodeCanvas value={qrCodeValue} size={200} />
+        <QRCodeCanvas value={JSON.stringify({ attendee_id: attendeeId, event_id: eventId })} size={200} />
       </div>
+
+      <Footer />
     </div>
   );
 };
