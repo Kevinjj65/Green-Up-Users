@@ -1,13 +1,10 @@
 import React, { useState } from "react";
-import { supabase } from "./../../services/supabaseClient"; // Adjust the path if needed
+import { supabase } from "../../services/supabaseClient"; // Adjust path if needed
 import { useNavigate } from "react-router-dom";
+import { FcGoogle } from "react-icons/fc";
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -23,11 +20,8 @@ const Login = () => {
 
     const { email, password } = formData;
 
-    // Step 1: Attempt to log in
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    // Attempt to log in with Supabase
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       if (error.message.includes("Invalid login credentials")) {
@@ -41,7 +35,7 @@ const Login = () => {
       return;
     }
 
-    // Step 2: Check if the email exists in 'organizers' table
+    // Check if the email exists in 'organizers' table
     const { data: organizer, error: organizerError } = await supabase
       .from("organizers")
       .select("email_id")
@@ -55,16 +49,22 @@ const Login = () => {
       return;
     }
 
-    // Step 3: Navigate to home page if email exists
+    // Successful login
     alert("Login successful!");
     navigate("/organizenew");
     setLoading(false);
+  };
+
+  const handleGoogleLogin = () => {
+    console.log("Signing in with Google...");
+    // Add Google authentication logic here
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-black">
       <div className="bg-gray-900 p-8 rounded-lg shadow-lg w-80 text-center">
         <h2 className="text-2xl font-bold text-white mb-4">Welcome Back!</h2>
+        
         <form onSubmit={handleSubmit} className="flex flex-col">
           <input
             type="email"
@@ -93,6 +93,18 @@ const Login = () => {
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
+
+        <p className="text-white mt-4">or</p>
+
+        <button
+          type="button"
+          className="flex items-center justify-center gap-2 w-full bg-black text-white border border-white py-2 rounded-md mt-2 hover:text-blue-400 hover:underline"
+          onClick={handleGoogleLogin}
+        >
+          <FcGoogle size={24} />
+          <span>Sign in with Google</span>
+        </button>
+
         <p className="text-sm text-white mt-4">
           Not yet a Member?{" "}
           <span

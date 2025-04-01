@@ -65,8 +65,9 @@ const Signup = () => {
   };
 
   return (
-    <div className="w-full max-w-md bg-gray-900 p-5 rounded-lg text-center mx-auto flex flex-col items-center">
-      <h2 className="text-white mb-5 text-xl font-semibold">Be an Organizer Now!</h2>
+    <div className="w-full max-w-md bg-gray-900 p-6 rounded-lg text-center mx-auto flex flex-col items-center shadow-md">
+      <h2 className="text-white mb-4 text-xl font-semibold">Be an Organizer Now!</h2>
+
       <form onSubmit={handleSubmit} className="w-full flex flex-col">
         <input
           type="text"
@@ -75,7 +76,7 @@ const Signup = () => {
           value={formData.name}
           onChange={handleChange}
           required
-          className="w-full p-2 my-2 rounded-md border-none bg-white text-black text-lg placeholder-gray-500 focus:outline-green-500"
+          className="w-full p-2 my-2 rounded-md bg-white text-black text-lg placeholder-gray-500 focus:outline-green-500"
         />
         <input
           type="email"
@@ -84,7 +85,7 @@ const Signup = () => {
           value={formData.email}
           onChange={handleChange}
           required
-          className="w-full p-2 my-2 rounded-md border-none bg-white text-black text-lg placeholder-gray-500 focus:outline-green-500"
+          className="w-full p-2 my-2 rounded-md bg-white text-black text-lg placeholder-gray-500 focus:outline-green-500"
         />
         <input
           type="password"
@@ -93,7 +94,7 @@ const Signup = () => {
           value={formData.password}
           onChange={handleChange}
           required
-          className="w-full p-2 my-2 rounded-md border-none bg-white text-black text-lg placeholder-gray-500 focus:outline-green-500"
+          className="w-full p-2 my-2 rounded-md bg-white text-black text-lg placeholder-gray-500 focus:outline-green-500"
         />
         <input
           type="tel"
@@ -102,9 +103,10 @@ const Signup = () => {
           value={formData.phone}
           onChange={handleChange}
           required
-          className="w-full p-2 my-2 rounded-md border-none bg-white text-black text-lg placeholder-gray-500 focus:outline-green-500"
+          className="w-full p-2 my-2 rounded-md bg-white text-black text-lg placeholder-gray-500 focus:outline-green-500"
         />
 
+        {/* Terms & Conditions Checkbox */}
         <label className="text-white text-sm flex items-center mt-2">
           <input
             type="checkbox"
@@ -112,20 +114,23 @@ const Signup = () => {
             onChange={(e) => setAgreed(e.target.checked)}
             className="mr-2"
           />
-          I agree to Terms & Conditions
+          I agree to the Terms & Conditions
         </label>
 
+        {/* Submit Button */}
         <button
           type="submit"
           disabled={loading}
-          className="bg-green-500 text-white border-none p-3 mt-3 rounded-md text-lg cursor-pointer w-full disabled:bg-green-300 disabled:cursor-not-allowed"
+          className="bg-green-500 text-white p-3 mt-3 rounded-md text-lg cursor-pointer w-full disabled:bg-green-300 disabled:cursor-not-allowed"
         >
           {loading ? "Signing Up..." : "Sign Up"}
         </button>
       </form>
 
+      {/* Error Message */}
       {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
 
+      {/* Navigation Links */}
       <p className="text-white mt-4 text-sm">
         Already a Member?{" "}
         <span className="text-green-500 font-semibold cursor-pointer hover:underline" onClick={() => navigate("/organizerlogin")}>
