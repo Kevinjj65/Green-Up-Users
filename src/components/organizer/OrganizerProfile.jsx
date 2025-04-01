@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../services/supabaseClient";
 import OrganizerFooter from "./OrganizerFooter";
-import { FaEdit } from "react-icons/fa"; 
-import { useNavigate } from "react-router-dom";   
+import { FaEdit } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+
 const OrganizerProfile = () => {
   const [profile, setProfile] = useState({
     name: "",
@@ -15,11 +16,11 @@ const OrganizerProfile = () => {
   const [loading, setLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const navigate = useNavigate();
+
   useEffect(() => {
     const fetchProfile = async () => {
       setLoading(true);
 
-      // ✅ Get logged-in user
       const { data: authData, error: authError } = await supabase.auth.getUser();
       if (authError || !authData?.user) {
         console.error("Authentication error:", authError?.message);
@@ -27,14 +28,12 @@ const OrganizerProfile = () => {
         return;
       }
 
-      const userEmail = authData.user.email.toLowerCase(); // Ensure case consistency
-      console.log("User Email:", userEmail);
-
-      // ✅ Fetch organizer profile
+      const userEmail = authData.user.email.toLowerCase();
+      
       const { data, error: profileError } = await supabase
         .from("organizers")
         .select("id, name, email_id, phone_number, is_verified, fee_payment")
-        .ilike("email_id", userEmail) // Case-insensitive match
+        .ilike("email_id", userEmail)
         .single();
 
       if (profileError) {
@@ -42,10 +41,9 @@ const OrganizerProfile = () => {
       } else {
         setProfile(data);
       }
-
       setLoading(false);
     };
-
+    
     fetchProfile();
   }, []);
 
@@ -55,7 +53,6 @@ const OrganizerProfile = () => {
 
   const handleSave = async () => {
     setLoading(true);
-
     const { error } = await supabase
       .from("organizers")
       .update({
@@ -71,20 +68,22 @@ const OrganizerProfile = () => {
     } else {
       alert("Error updating profile.");
     }
-
     setLoading(false);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
   };
 
   return (
     <div className="max-w-xl mx-auto mt-10 p-6 bg-gray-900 text-white shadow-md rounded-lg">
-          {/* ✅ Back Button */}
       <button
         onClick={() => navigate(-1)}
         className="mb-4 bg-gray-500 text-white px-4 py-2 rounded-md"
       >
         ← Back
       </button>
-      {/* ✅ Edit Icon */}
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-semibold">Organizer Profile</h1>
         <button onClick={() => setEditMode(!editMode)} className="text-green-400 hover:text-green-500">
@@ -92,7 +91,6 @@ const OrganizerProfile = () => {
         </button>
       </div>
 
-      {/* ✅ Profile Inputs */}
       <div className="space-y-3">
         <input
           type="text"
@@ -130,7 +128,6 @@ const OrganizerProfile = () => {
         />
       </div>
 
-      {/* ✅ Save Button */}
       {editMode && (
         <button
           onClick={handleSave}
@@ -141,7 +138,14 @@ const OrganizerProfile = () => {
         </button>
       )}
 
-      {/* ✅ Footer */}
+      {/* Logout Button */}
+      <button
+        onClick={handleLogout}
+        className="mt-6 bg-red-500 text-white px-4 py-2 rounded-md w-full"
+      >
+        Logout
+      </button>
+      
       <OrganizerFooter />
     </div>
   );

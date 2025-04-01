@@ -43,6 +43,7 @@ import RegisteredEvents from "./components/user/RegisteredEvents/RegisteredEvent
         <Route path="/orgmaps" element={<OrgMaps />} />
         <Route path="/organizersignup" element={<SignUp />} />
           <Route path="/scan" element={<Scan />} />
+          <Route path = "/registeredevents" element={<RegisteredEvents/>}/>
           <Route path="/afterregistration/:eventId/:attendeeId" element={<AfterRegistration/>} />
         </Routes>
       </BrowserRouter>
