@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { supabase } from "../../../services/supabaseClient";
+import { supabase } from "./../../../services/supabaseClient";
 import { QRCodeCanvas } from "qrcode.react";
 import Footer from "../Footer/Footer";
 
@@ -9,6 +9,7 @@ const AfterRegistration = () => {
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [eventAddress, setEventAddress] = useState("Fetching location...");
+  const [organizerId, setOrganizerId] = useState(null); // State to store the organizer_id
 
   console.log("Received eventId:", eventId, "attendeeId:", attendeeId);
 
@@ -25,12 +26,13 @@ const AfterRegistration = () => {
       try {
         const { data, error } = await supabase
           .from("events")
-          .select("title, description, latitude, longitude")
+          .select("title, description, latitude, longitude, organizer_id")
           .eq("id", eventId)
           .single();
 
         if (error) throw error;
         setEvent(data);
+        setOrganizerId(data.organizer_id); // Set the organizer_id here
 
         if (data.latitude && data.longitude) {
           fetchAddressFromCoordinates(data.latitude, data.longitude);
@@ -92,6 +94,16 @@ const AfterRegistration = () => {
         <p className="text-lg font-semibold">Your QR Code</p>
         <QRCodeCanvas value={JSON.stringify({ attendee_id: attendeeId, event_id: eventId })} size={200} />
       </div>
+
+      {/* Chat Button to navigate to chat page with event creator */}
+      {organizerId && (
+        <button
+          onClick={() => navigate(`/chat/${organizerId}/${eventId}/${attendeeId}`)} // Updated URL with attendeeId
+          className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-all"
+        >
+          Chat with Event Creator
+        </button>
+      )}
 
       <Footer />
     </div>

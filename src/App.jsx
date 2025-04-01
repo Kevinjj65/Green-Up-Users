@@ -17,7 +17,10 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import AfterRegistration from "./components/user/AfterRegistration/AfterRegistration";
 import UserProfile from "./components/user/UserProfile/UserProfile.jsx";
 import RegisteredEvents from "./components/user/RegisteredEvents/RegisteredEvents.jsx";
-
+//import OrganizerEventChat from "./components/organizer/OrganizerAttendeeChat.jsx";
+import Chat from './components/Chat/Chat.jsx'
+import OrganizerChatList from "./components/organizer/OrganizerChatList.jsx";
+import OrganizerChat from "./components/organizer/OrganizerChat.jsx";
  function App() {
 
 
@@ -45,6 +48,10 @@ import RegisteredEvents from "./components/user/RegisteredEvents/RegisteredEvent
           <Route path="/scan" element={<Scan />} />
           <Route path = "/registeredevents" element={<RegisteredEvents/>}/>
           <Route path="/afterregistration/:eventId/:attendeeId" element={<AfterRegistration/>} />
+          <Route path="/chat/:organizerId/:eventId/:attendeeId" element={<Chat />} />
+          <Route path="/organizer/event/:eventId/chat" element={<OrganizerChatList />} />
+          <Route path="/organizer/chat/:eventId/:attendeeId" element={<OrganizerChat />} />
+
         </Routes>
       </BrowserRouter>
     </>

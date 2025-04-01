@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../../services/supabaseClient";
+import { supabase } from "./../../services/supabaseClient";
 import { useNavigate } from "react-router-dom";
 import OrganizerFooter from "./OrganizerFooter";
 
@@ -86,7 +86,7 @@ const OrganizerEvents = () => {
               >
                 {/* Event Image */}
                 <img
-                  src={event.images || "/placeholder.jpg"} // Placeholder for missing images
+                  src={event.images || "/placeholder.jpg"}
                   alt={event.title}
                   className="w-24 h-24 object-cover rounded-l-lg"
                 />
@@ -95,6 +95,16 @@ const OrganizerEvents = () => {
                 <div className="p-4 flex-1">
                   <h2 className="text-lg font-semibold text-gray-900">{event.title}</h2>
                   <p className="text-sm text-gray-600">{event.date}</p>
+                  {/* Chat Button with stopPropagation */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent bubbling to <li>
+                      navigate(`/organizer/event/${event.id}/chat`);
+                    }}
+                    className="mt-2 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-all"
+                  >
+                    Chat with Attendees
+                  </button>
                 </div>
               </li>
             ))}
