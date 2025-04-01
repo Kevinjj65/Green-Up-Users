@@ -43,8 +43,8 @@ const Maps = ({ eventLocations, highlightedIds }) => {
   }, []);
 
   return (
-    <div className="map-container" style={{ width: "70vw", height: "70vh" }}>
-      <MapContainer center={userLocation || [40.7128, -74.006]} zoom={13} style={{ width: "100%", height: "100%" }}>
+    <div className="w-[70vw] h-[70vh]">
+      <MapContainer center={userLocation || [40.7128, -74.006]} zoom={13} className="w-full h-full">
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

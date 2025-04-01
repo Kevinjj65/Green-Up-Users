@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "./../../services/supabaseClient"; // Adjust path if needed
-import "./Signup.css"; // Import CSS
+import { supabase } from "./../../services/supabaseClient";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -33,7 +32,6 @@ const Signup = () => {
 
     const { email, password, name, phone, role } = formData;
 
-    // Sign up user with Supabase Auth
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -47,7 +45,6 @@ const Signup = () => {
     } else {
       alert("Signup successful! Check your email to verify your account.");
 
-      // Insert into organizers table
       if (role === "organizer" && data.user) {
         const { error: insertError } = await supabase.from("organizers").insert([
           {
@@ -68,9 +65,9 @@ const Signup = () => {
   };
 
   return (
-    <div className="signup-container">
-      <h2>Be an Organizer Now!</h2>
-      <form onSubmit={handleSubmit}>
+    <div className="w-full max-w-md bg-gray-900 p-5 rounded-lg text-center mx-auto flex flex-col items-center">
+      <h2 className="text-white mb-5 text-xl font-semibold">Be an Organizer Now!</h2>
+      <form onSubmit={handleSubmit} className="w-full flex flex-col">
         <input
           type="text"
           name="name"
@@ -78,6 +75,7 @@ const Signup = () => {
           value={formData.name}
           onChange={handleChange}
           required
+          className="w-full p-2 my-2 rounded-md border-none bg-white text-black text-lg placeholder-gray-500 focus:outline-green-500"
         />
         <input
           type="email"
@@ -86,6 +84,7 @@ const Signup = () => {
           value={formData.email}
           onChange={handleChange}
           required
+          className="w-full p-2 my-2 rounded-md border-none bg-white text-black text-lg placeholder-gray-500 focus:outline-green-500"
         />
         <input
           type="password"
@@ -94,6 +93,7 @@ const Signup = () => {
           value={formData.password}
           onChange={handleChange}
           required
+          className="w-full p-2 my-2 rounded-md border-none bg-white text-black text-lg placeholder-gray-500 focus:outline-green-500"
         />
         <input
           type="tel"
@@ -102,29 +102,40 @@ const Signup = () => {
           value={formData.phone}
           onChange={handleChange}
           required
+          className="w-full p-2 my-2 rounded-md border-none bg-white text-black text-lg placeholder-gray-500 focus:outline-green-500"
         />
-        <label>
+
+        <label className="text-white text-sm flex items-center mt-2">
           <input
             type="checkbox"
             checked={agreed}
             onChange={(e) => setAgreed(e.target.checked)}
-          />{" "}
+            className="mr-2"
+          />
           I agree to Terms & Conditions
         </label>
-        <button type="submit" disabled={loading}>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-green-500 text-white border-none p-3 mt-3 rounded-md text-lg cursor-pointer w-full disabled:bg-green-300 disabled:cursor-not-allowed"
+        >
           {loading ? "Signing Up..." : "Sign Up"}
         </button>
       </form>
-      {error && <p className="error">{error}</p>}
-      <p>
+
+      {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+
+      <p className="text-white mt-4 text-sm">
         Already a Member?{" "}
-        <span className="link" onClick={() => navigate("/organizerlogin")}>
-        <u>Click Here</u>
+        <span className="text-green-500 font-semibold cursor-pointer hover:underline" onClick={() => navigate("/organizerlogin")}>
+          <u>Click Here</u>
         </span>
       </p>
-      <p>
+
+      <p className="text-white mt-2 text-sm">
         Are you a Volunteer?{" "}
-        <span className="link" onClick={() => navigate("/userlogin")}>
+        <span className="text-green-500 font-semibold cursor-pointer hover:underline" onClick={() => navigate("/userlogin")}>
           <u>Click Here</u>
         </span>
       </p>
