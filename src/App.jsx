@@ -45,7 +45,6 @@ import RegisteredEvents from "./components/user/RegisteredEvents/RegisteredEvent
           <Route path="/scan" element={<Scan />} />
           <Route path = "/registeredevents" element={<RegisteredEvents/>}/>
           <Route path="/afterregistration/:eventId/:attendeeId" element={<AfterRegistration/>} />
-
         </Routes>
       </BrowserRouter>
     </>
