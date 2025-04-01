@@ -171,7 +171,6 @@ const Chat = () => {
         async (payload) => {
           const newMessage = payload.new;
 
-          // Ensure the message belongs to this chat
           if (
             newMessage.event_id !== eventId ||
             newMessage.attendee_id !== attendeeId ||
@@ -200,7 +199,6 @@ const Chat = () => {
           }
 
           setMessages((prevMessages) => {
-            // Prevent duplicates by checking message id
             if (prevMessages.some((msg) => msg.id === newMessage.id)) return prevMessages;
             return [...prevMessages, { ...newMessage, name: senderName }];
           });
@@ -240,7 +238,7 @@ const Chat = () => {
 
       if (insertError) throw insertError;
 
-      setMessageInput(""); // Clear input after successful send
+      setMessageInput("");
     } catch (error) {
       console.error("Error sending message:", error.message);
     }
@@ -279,6 +277,11 @@ const Chat = () => {
                         (!message.sent_by && message.organizer_id === currentUserId)
                           ? "right"
                           : "left",
+                      color:
+                        (message.sent_by && message.attendee_id === currentUserId) ||
+                        (!message.sent_by && message.organizer_id === currentUserId)
+                          ? "blue"
+                          : "inherit",
                     }}
                   >
                     <p>
@@ -302,7 +305,12 @@ const Chat = () => {
             onKeyPress={(e) => e.key === "Enter" && handleSendMessage(e)}
             placeholder="Type a message..."
           />
-          <button onClick={handleSendMessage}>Send</button>
+          <button
+            className="px-2 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+            onClick={handleSendMessage}
+            >
+            Send
+          </button>
         </div>
         <Footer />
       </div>

@@ -6,7 +6,7 @@ const OrganizerFooter = () => {
   return (
     <footer className="fixed bottom-0 left-0 right-0 bg-green-800 py-2 flex justify-center space-x-6 text-white z-50">
       {[
-        { icon: <FaHome />, tooltip: "Home", link: "/home" },
+        { icon: <FaHome />, tooltip: "Home", link: "/organizer/events" },
         { icon: <FaPlus />, tooltip: "Create New", link: "/organizenew" },
         { icon: <FaUser />, tooltip: "Organizer Info", link: "/organizer/profile" },
       ].map((item, index) => (

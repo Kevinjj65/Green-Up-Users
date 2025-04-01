@@ -165,7 +165,7 @@ const OrganizerChat = () => {
   }, [messages]);
 
   const handleSendMessage = async () => {
-    if (!messageInput.trim() | !organizerId) return;
+    if (!messageInput.trim() || !organizerId) return;
 
     const tempId = `temp-${Date.now()}`;
     const newMessage = {

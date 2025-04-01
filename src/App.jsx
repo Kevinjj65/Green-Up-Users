@@ -6,7 +6,7 @@ import Events from "./components/events/Events";
 import Chat from "./components/Chat/Chat.jsx";
 
 // Organizer Components
-import AddNew from "./components/organizer/AddNew";
+import AddNew from "./components/organizer/AddNew.jsx";
 import Login from "./components/organizer/login page/Login.jsx";
 import SignUp from "./components/organizer/signup page/Signup";
 import Scan from "./components/organizer/scan.jsx";
@@ -39,7 +39,6 @@ import RegisteredEvents from "./components/user/RegisteredEvents/RegisteredEvent
           <Route path="/" element={<Home />} />
           <Route path="/events" element={<Events />} />
           <Route path="/registerevent" element={<RegisterEvent />} />
-          <Route path="/Footer"element={<Footer />} />
           <Route path="/userlogin" element={<LLogin />} />
           <Route path="/usersignup" element={<SSignup />} />
           <Route path="/usermaps" element={<UserMaps />} />
