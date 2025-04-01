@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { supabase } from "../../services/supabaseClient";
+import { supabase } from "./../../services/supabaseClient";
+import "./../organizer/Login.css"; // Keeping the same styling as your Login.jsx
+
 const AuthModal = ({ isOpen, onClose }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
@@ -44,7 +46,7 @@ const AuthModal = ({ isOpen, onClose }) => {
       if (error) alert(error.message);
       else onClose();
     } else {
-      const { error, data } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
@@ -61,39 +63,37 @@ const AuthModal = ({ isOpen, onClose }) => {
   };
 
   return isOpen ? (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center">
-      <div className="bg-[#1e1e1e] p-6 rounded-lg shadow-lg w-80">
-        <h2 className="text-[#39FF14] text-2xl font-bold mb-4">
-          {isLogin ? "Login" : "Sign Up"}
-        </h2>
-        <form onSubmit={handleAuth} className="flex flex-col">
+    <div className="login-container">
+      <div className="login-box">
+        <h2>{isLogin ? "Welcome Back!" : "Join Us Today!"}</h2>
+        <form onSubmit={handleAuth}>
           {!isLogin && (
             <input
               type="text"
               name="name"
               placeholder="Full Name"
+              className="input-field"
               value={formData.name}
               onChange={handleChange}
-              className="p-2 mb-2 rounded bg-[#292929] text-white"
               required
             />
           )}
           <input
             type="email"
             name="email"
-            placeholder="Email Address"
+            placeholder="Email"
+            className="input-field"
             value={formData.email}
             onChange={handleChange}
-            className="p-2 mb-2 rounded bg-[#292929] text-white"
             required
           />
           <input
             type="password"
             name="password"
             placeholder="Password"
+            className="input-field"
             value={formData.password}
             onChange={handleChange}
-            className="p-2 mb-2 rounded bg-[#292929] text-white"
             required
           />
           {!isLogin && (
@@ -102,33 +102,27 @@ const AuthModal = ({ isOpen, onClose }) => {
                 type="tel"
                 name="phone"
                 placeholder="Phone Number"
+                className="input-field"
                 value={formData.phone}
                 onChange={handleChange}
-                className="p-2 mb-2 rounded bg-[#292929] text-white"
                 required
               />
-              <p className="text-sm text-gray-400">
+              <p className="location-text">
                 {formData.location ? `Location: ${formData.location}` : "Fetching location..."}
               </p>
             </>
           )}
-          <button
-            type="submit"
-            className="bg-[#39FF14] text-[#1e1e1e] font-semibold py-2 mt-3 rounded-full hover:scale-105 transition"
-          >
+          <button type="submit" className="login-button">
             {isLogin ? "Login" : "Sign Up"}
           </button>
         </form>
-        <p className="text-gray-300 text-sm mt-3">
+        <p className="signup-text">
           {isLogin ? "New here?" : "Already have an account?"}{" "}
-          <span
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-[#39FF14] cursor-pointer"
-          >
-            {isLogin ? "Sign up" : "Login"}
+          <span className="signup-link" onClick={() => setIsLogin(!isLogin)}>
+            {isLogin ? "Sign Up" : "Login"}
           </span>
         </p>
-        <button onClick={onClose} className="text-gray-400 mt-3 hover:text-white">
+        <button className="close-button" onClick={onClose}>
           Close
         </button>
       </div>

@@ -1,29 +1,23 @@
-/* SignUp.css */
-
 .signup-container {
-  background: rgb(31, 30, 30);
-  padding: 25px;
+  width: 100%;
+  max-width: 400px;
+  background-color: #1a1a1a;
+  padding: 20px;
   border-radius: 10px;
+<<<<<<< HEAD:src/components/organizer/signup page/Signup.css
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   width: 350px;
+=======
+>>>>>>> 27ab7e49b1cb6768142c25d579f8e9686ad6e5f4:src/components/organizer/Signup.css
   text-align: center;
-}
-
-.signup-title {
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
-  font-size: 22px;
-  font-weight: bold;
-  margin-bottom: 15px;
-  color: white;
-}
-
-.signup-form {
+  margin: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1px;
 }
 
+<<<<<<< HEAD:src/components/organizer/signup page/Signup.css
 .signup-form input {
   width: 92%;
   padding: 7px;
@@ -75,11 +69,14 @@
 
 .signup-form .or-text {
   display: flex;
+=======
+h2 {
+>>>>>>> 27ab7e49b1cb6768142c25d579f8e9686ad6e5f4:src/components/organizer/Signup.css
   color: white;
-  justify-content: center;
-  margin-top: 10px;
+  margin-bottom: 20px;
 }
 
+<<<<<<< HEAD:src/components/organizer/signup page/Signup.css
 .signup-form .google-btn {
   display: flex;                 
   justify-content: center;
@@ -93,42 +90,81 @@
   background-color: #000000;
   border-radius: 9px;                    /* dark text */
   font-size: 15px;
+=======
+form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 5px;
+  border: none;
+  background-color: #fff;
+  font-size: 16px;
+  color: #000; /* Ensures text is visible */
+}
+
+input::placeholder {
+  color: #888; /* Light gray placeholder text */
+}
+
+input:focus {
+  outline: 2px solid #4caf50;
+}
+
+
+label {
+  color: white;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 5px;
+  font-size: 16px;
+>>>>>>> 27ab7e49b1cb6768142c25d579f8e9686ad6e5f4:src/components/organizer/Signup.css
   cursor: pointer;
-  transition: background-color 0.3s, color 0.3s;
+  width: 100%;
 }
 
-.signup-form .signup-btn:hover {
-  background-color: #8be79c;
+button:disabled {
+  background-color: #7cba7c;
+  cursor: not-allowed;
 }
 
-.signup-form .google-btn:hover {
-  color: rgb(197, 197, 198);
-  text-decoration: underline;
-  text-decoration-color: blue;
-}
-
-.signup-form .log-text {
+p {
   color: white;
-  margin-top: 10px;
-  font-size: small;
+  margin-top: 15px;
+  font-size: 14px;
 }
 
-.signup-form .login-btn{
-  color: rgb(87, 211, 100);
+p a {
+  color: #4caf50;
+  text-decoration: none;
+  font-weight: bold;
 }
-.signup-form .login-btn:hover{
-  color: rgb(123, 123, 238);
+
+p a:hover {
   text-decoration: underline;
 }
-.signup-form .volunteer-text {
-  color: white;
+
+.error {
+  color: red;
+  font-size: 14px;
   margin-top: 10px;
-  font-size: small;
-}
-.signup-form .volunteer-btn{
-  color: rgb(87, 211, 100);
-}
-.signup-form .volunteer-btn:hover{
-  color: rgb(123, 123, 238);
-  text-decoration: underline;
 }
