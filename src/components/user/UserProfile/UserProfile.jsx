@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../../../services/supabaseClient.jsx"; // Adjust path if needed
 import Footer from "../Footer/Footer";
-import { useNavigate } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
+
 function UserProfile() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       setLoading(true);
@@ -22,17 +24,18 @@ function UserProfile() {
       }
 
       const userId = authUser.user.id;
-
+      
       // Fetch user details from 'participants' table
       const { data: userData, error: userError } = await supabase
         .from("participants")
-        .select("name, email_id, phone_number")
+        .select("name, email_id, phone_number, reward_points")
         .eq("id", userId)
         .single();
-
+      
       if (userError) {
         setError("Failed to fetch user data.");
       } else {
+        
         setUser(userData);
       }
 
@@ -49,8 +52,19 @@ function UserProfile() {
     window.location.reload(); // Refresh page after logout
   };
 
+  // Navigate to reward points page
+  const handlePointsClick = () => {
+    if (user) {
+      
+      navigate("/rewardpoints"); // Ensure user ID is passed
+    } else {
+      console.error("User ID is undefined.");
+    }
+  };
+  
+
   return (
-    <div className="w-screen min-h-screen bg-[#1E1E1E] text-white flex flex-col items-center justify-center relative">
+    <div className="w-screen min-h-screen bg-[#1E1E1E] text-white flex flex-col items-center justify-between pb-20">
       {/* Main Content */}
       <div className="flex flex-col items-center justify-center w-[60vw] min-h-[70vh] space-y-8">
         {/* Profile Circle */}
@@ -93,25 +107,33 @@ function UserProfile() {
               <p className="text-md text-gray-300 ml-[10%]">{user?.phone_number || "N/A"}</p>
             </div>
             <div className="w-full h-[2px] bg-white border border-white rounded-md"></div>
+
+            {/* Current Points Section */}
+            <div className="flex flex-col items-center w-full mt-6">
+              <h2 className="text-lg font-semibold text-white">Current Points</h2>
+              <div className="w-16 h-16 flex items-center justify-center bg-gray-700 text-white text-2xl font-bold rounded-md mt-2" onClick={handlePointsClick}>
+                <p className="text-md text-gray-300 ml-[10%]">{user?.reward_points || "N/A"}</p>
+              </div>
+            </div>
           </div>
         )}
       </div>
 
       {/* Logout Button */}
-      <div className="w-full flex justify-center absolute bottom-20">
-      <button
-  onClick={handleLogout}
-  className="px-2 py-1 text-sm bg-red-600 hover:bg-red-800 text-white font-semibold rounded-md transition duration-200"
-  style={{ width: "80px", minWidth: "unset" }}
->
-  Logout
-</button>
-
-
+      <div className="w-full flex justify-center mt-6">
+        <button
+          onClick={handleLogout}
+          className="px-2 py-1 text-sm bg-red-600 hover:bg-red-800 text-white font-semibold rounded-md transition duration-200"
+          style={{ width: "80px", minWidth: "unset" }}
+        >
+          Logout
+        </button>
       </div>
 
       {/* Footer */}
-      <Footer />
+      <div className="w-full">
+        <Footer />
+      </div>
     </div>
   );
 }

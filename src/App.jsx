@@ -26,6 +26,8 @@ import AfterRegistration from "./components/user/AfterRegistration/AfterRegistra
 import UserProfile from "./components/user/UserProfile/UserProfile.jsx";
 import RegisteredEvents from "./components/user/RegisteredEvents/RegisteredEvents.jsx";
 import AllEvents from "./components/user/allevents/AllEvents.jsx";
+import RewardPoints from "./components/user/RewardPoints/RewardPoints.jsx";
+
  function App() {
 
 
@@ -58,6 +60,7 @@ import AllEvents from "./components/user/allevents/AllEvents.jsx";
           <Route path="/chat/:organizerId/:eventId/:attendeeId" element={<Chat />} />
           <Route path="/organizer/event/:eventId/chat" element={<OrganizerChatList />} />
           <Route path="/organizer/chat/:eventId/:attendeeId" element={<OrganizerChat />} />
+          <Route path="/rewardpoints" element={<RewardPoints />} />
         </Routes>
       </BrowserRouter>
     </>
