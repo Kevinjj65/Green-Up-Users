@@ -9,8 +9,10 @@ const Events = () => {
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]); // ✅ Stores events within 10km
   const [isMapView, setIsMapView] = useState(false);
+
   const [userLocation, setUserLocation] = useState(null);
   const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY; // ✅ Get API Key from .env file
+
 
   // Fetch Events with Location Details
   useEffect(() => {
@@ -105,19 +107,26 @@ const Events = () => {
   }
 
   return (
-    <div className="min-h-screen bg-green-50 text-green-900">
-      {/* Header */}
-      <header className="bg-green-700 py-4 px-6 flex items-center justify-between text-white sticky top-0 z-10">
-        <h1 className="text-xl font-bold">All Events</h1>
+    <div className="bg-green-50 min-h-screen flex flex-col">
+      {/* Sticky Header (No Text Overflow) */}
+      <header className="bg-green-700 py-4 px-6 flex items-center justify-between text-white sticky top-0 left-0 right-0 z-10 h-16 overflow-hidden">
+        {/* Title - With max width */}
+        <h1 className="text-xl font-bold truncate flex-1 max-w-[30vw]">
+          All Events
+        </h1>
 
+        {/* Toggle Button - With max width */}
         <button
+
          onClick={() => navigate("/usermaps")}
           className="flex items-center justify-center bg-green-500 text-xs px-3 py-1 rounded-md hover:bg-green-600 transition !h-auto !w-auto"
+
         >
-          <ArrowsRightLeftIcon className="h-4 w-4 mr-1" />
+          <ArrowsRightLeftIcon className="h-3 w-3 mr-1" />
           {isMapView ? "Events View" : "Map View"}
         </button>
       </header>
+
 
       {/* Events List */}
       <div className="p-6 overflow-x-auto">
@@ -125,36 +134,39 @@ const Events = () => {
         <div className="flex space-x-6 overflow-x-scroll scrollbar-hide">
           {filteredEvents.length > 0 ? (
             filteredEvents.map((event) => (
+
               <div
                 key={event.id}
-                className="bg-green-200 p-4 rounded-lg shadow-md w-64 cursor-pointer hover:bg-green-300 transition"
+                className="bg-green-200 p-4 rounded-lg shadow-md cursor-pointer hover:bg-green-300 transition"
                 onClick={() => navigate(`/registerevent/${event.id}`)}
               >
                 <img
                   src={event.images}
                   alt={event.title}
-                  className="w-full h-32 object-cover rounded-t-lg"
+                  className="w-full h-40 object-cover rounded-t-lg"
                 />
-                <h3 className="text-lg font-semibold mt-2 text-center">{event.title}</h3>
+                <h3 className="text-lg font-semibold mt-2 text-center truncate max-w-full">{event.title}</h3>
                 <div className="mt-2 text-sm flex flex-col space-y-1">
                   {/* 📅 Event Date */}
                   <div className="flex items-center">
                     <ClockIcon className="h-5 w-5 text-green-700 mr-2" />
-                    <span>{event.date}</span>
+                    <span className="truncate max-w-full">{event.date}</span>
                   </div>
                   {/* 📍 Event Location */}
                   <div className="flex items-center">
                     <MapPinIcon className="h-5 w-5 text-red-600 mr-2" />
-                    <span>{event.address}</span>
+                    <span className="truncate max-w-full">{event.address}</span>
                   </div>
                 </div>
               </div>
+
             ))
           ) : (
             <p className="text-gray-500">No events available within 10 km.</p>
           )}
         </div>
       </div>
+
 
       {/* Footer */}
       <Footer />

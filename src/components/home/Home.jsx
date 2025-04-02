@@ -64,7 +64,7 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#1e1e1e] text-[#39FF14]">
+    <div className="w-screen h-screen bg-[#1e1e1e] text-[#39FF14] flex flex-col">
       {/* Header - Fixed at the top */}
       <header className="bg-[#1e1e1e] py-4 px-6 flex justify-between items-center border-b border-[#39FF14] sticky top-0 z-50">
         <h1 className="text-2xl font-bold">GREEN UP</h1>
@@ -83,28 +83,25 @@ const Home = () => {
             cursor: "pointer",
             textAlign: "center",
             display: "flex",
-            alignItems: "center",  // Centers text vertically
-            justifyContent: "center", // Centers text horizontally
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
           Login
         </button>
-
-
-
       </header>
 
-      {/* Main Section */}
-      <main className="p-6">
+      {/* Main Section - Enables Vertical Scrolling */}
+      <main className="p-6 flex-1 overflow-y-auto">
         <h2 className="text-3xl font-semibold mb-4">Nearby Events</h2>
 
-        {/* Horizontally Scrollable Event List */}
-        <div className="flex space-x-6 overflow-x-auto scrollbar-hide p-2">
+        {/* Event Grid - 2 Cards Per Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-2">
           {events.length > 0 ? (
             events.map((event) => (
               <div
                 key={event.id}
-                className="bg-[#39FF14] text-[#1e1e1e] p-4 rounded-lg shadow-lg w-64 flex-shrink-0"
+                className="bg-[#39FF14] text-[#1e1e1e] p-4 rounded-lg shadow-lg"
               >
                 <img
                   onClick={() => navigate("/userlogin")}
