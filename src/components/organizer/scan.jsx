@@ -43,7 +43,7 @@ const QRScanner = ({ eventId }) => {
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" }, // Use rear camera if available
+        video: { facingMode: "environment" },
       });
       videoRef.current.srcObject = stream;
       setIsCameraActive(true);
@@ -82,14 +82,14 @@ const QRScanner = ({ eventId }) => {
 
       if (qrCode) {
         processQRCode(qrCode.data);
-        stopCamera(); // Stop scanning once a QR code is found
+        stopCamera();
         return;
       }
     }
     requestAnimationFrame(scanCamera);
   };
 
-  // Process QR code data (shared logic for file and camera)
+  // Process QR code data
   const processQRCode = (qrData) => {
     try {
       const scannedData = JSON.parse(qrData);
@@ -164,56 +164,62 @@ const QRScanner = ({ eventId }) => {
   }, []);
 
   return (
-    <div className="flex flex-col items-center">
-      <h2 className="text-xl font-semibold mt-4">QR Code Scanner</h2>
+    <div className="min-h-screen flex flex-col items-center pb-20">
+      {/* Added pb-20 to ensure padding at the bottom for footer clearance */}
+      <div className="w-full max-w-md flex flex-col items-center space-y-6 overflow-y-auto">
+        {/* max-w-md limits width, overflow-y-auto enables scrolling */}
+        <h2 className="text-xl font-semibold mt-4">QR Code Scanner</h2>
 
-      {/* File Upload for QR Code */}
-      <input
-        type="file"
-        accept="image/*"
-        onChange={handleFileUpload}
-        className="my-4"
-      />
+        {/* File Upload for QR Code */}
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleFileUpload}
+          className="my-4 w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+        />
 
-      {/* Camera Scanner Controls */}
-      <div className="my-4">
-        {!isCameraActive ? (
-          <button
-            onClick={startCamera}
-            className="bg-blue-500 text-white px-4 py-2 rounded"
-          >
-            Start Camera Scanner
-          </button>
-        ) : (
-          <button
-            onClick={stopCamera}
-            className="bg-red-500 text-white px-4 py-2 rounded"
-          >
-            Stop Camera
-          </button>
+        {/* Camera Scanner Controls */}
+        <div className="my-4">
+          {!isCameraActive ? (
+            <button
+              onClick={startCamera}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+            >
+              Start Camera Scanner
+            </button>
+          ) : (
+            <button
+              onClick={stopCamera}
+              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+            >
+              Stop Camera
+            </button>
+          )}
+        </div>
+
+        {/* Video Feed for Camera */}
+        {isCameraActive && (
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            className="w-full max-w-md rounded-lg shadow-md"
+          />
+        )}
+
+        {/* Error or Success Message */}
+        {error && <p className="text-red-500 text-center">{error}</p>}
+
+        {/* Display entire scanned QR code data */}
+        {scanResult && (
+          <div className="mt-4 w-full">
+            <p className="font-semibold text-center">Scanned QR Code Data:</p>
+            <pre className="bg-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
+              {JSON.stringify(scanResult, null, 2)}
+            </pre>
+          </div>
         )}
       </div>
-
-      {/* Video Feed for Camera */}
-      {isCameraActive && (
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          className="w-full max-w-md"
-        />
-      )}
-
-      {/* Error or Success Message */}
-      {error && <p className="text-red-500">{error}</p>}
-
-      {/* Display entire scanned QR code data */}
-      {scanResult && (
-        <div className="mt-4">
-          <p className="font-semibold">Scanned QR Code Data:</p>
-          <pre>{JSON.stringify(scanResult, null, 2)}</pre>
-        </div>
-      )}
     </div>
   );
 };
