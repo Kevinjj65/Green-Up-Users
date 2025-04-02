@@ -20,7 +20,7 @@ function AddNew() {
     const [loading, setLoading] = useState(false);
     const [uploadStatus, setUploadStatus] = useState("");
     const [selectedFile, setSelectedFile] = useState(null);
-    const [locationDebug, setLocationDebug] = useState(""); // For debugging
+    const [locationDebug, setLocationDebug] = useState(""); // Debug info
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -30,7 +30,7 @@ function AddNew() {
         });
 
         if (name === "location") {
-            setLocationDebug(`Input: ${value}`); // Debug what user typed
+            setLocationDebug(`Input: ${value}`);
             fetchCoordinates(value);
         }
     };
@@ -42,8 +42,9 @@ function AddNew() {
         }
 
         try {
-            // Ensure the full address is encoded properly
-            const encodedAddress = encodeURIComponent(address.trim());
+            // Use the full address and add context if needed
+            const fullAddress = `${address}, Kochi, Kerala, India`; // Adding context
+            const encodedAddress = encodeURIComponent(fullAddress.trim());
             const response = await fetch(
                 `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&limit=1`
             );
@@ -145,7 +146,7 @@ function AddNew() {
                     reward_points: Number(eventData.reward_points),
                     images: eventData.image_url,
                     organizer_id: organizerId,
-                    location: eventData.location // Store the full location string too
+                    location: eventData.location // Store the original input
                 }
             ]);
 
@@ -206,11 +207,10 @@ function AddNew() {
                         className="bg-gray-200 text-gray-900 w-full rounded px-3 h-[37px] text-xs mb-6"
                         type="text"
                         name="location"
-                        placeholder="Location (City, Address)"
+                        placeholder="Location (e.g., Kakkanad, Kochi, Kerala, India)"
                         onChange={handleChange}
                         required
                     />
-                    {/* Debug output for location */}
                     {locationDebug && <p className="text-xs text-gray-400 mb-6">{locationDebug}</p>}
 
                     <input
