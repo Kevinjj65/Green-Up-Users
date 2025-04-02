@@ -148,6 +148,7 @@ const QRScanner = ({ eventId }) => {
       const currentTime = new Date().toISOString();
 
       if (!data.check_in_time) {
+        // Check-in
         await supabase
           .from("registrations")
           .update({ check_in_time: currentTime })
@@ -157,7 +158,8 @@ const QRScanner = ({ eventId }) => {
           ...prev,
           check_in_time: currentTime,
         }));
-      } else if (!data.check_out_time) {
+      } else if (data.check_in_time && !data.check_out_time) {
+        // Check-out
         await supabase
           .from("registrations")
           .update({ check_out_time: currentTime })
@@ -167,8 +169,9 @@ const QRScanner = ({ eventId }) => {
           ...prev,
           check_out_time: currentTime,
         }));
-      } else {
-        setError("Already checked out.");
+      } else if (data.check_in_time && data.check_out_time) {
+        // Both check-in and check-out are already filled
+        setError("This user has checked in and out once already.");
       }
     } catch (err) {
       setError("Database update failed.");
