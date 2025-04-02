@@ -19,7 +19,7 @@ import OrganizerChat from "./components/organizer/OrganizerChat.jsx";
 
 // User Components
 import RegisterEvent from "./components/user/RegisterEvent/RegisterEvent.jsx";
-import LLogin from "./components/user/Login/Login.jsx";
+import LLogin from "./components/user/Login/login.jsx";
 import SSignup from "./components/user/Login/Signup.jsx";
 import UserMaps from "./components/user/Map/EventsMap.jsx";
 import AfterRegistration from "./components/user/AfterRegistration/AfterRegistration.jsx";
