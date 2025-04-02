@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { supabase } from "../../services/supabaseClient.jsx";
 
 // Default Green Marker Icon
 const greenMarkerIcon = new L.Icon({
@@ -31,7 +33,9 @@ const RecenterMap = ({ location }) => {
 };
 
 const Maps = ({ eventLocations, highlightedIds }) => {
+  const navigate = useNavigate();
   const [userLocation, setUserLocation] = useState(null);
+  const [registeredEvents, setRegisteredEvents] = useState({});
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
@@ -42,9 +46,43 @@ const Maps = ({ eventLocations, highlightedIds }) => {
     );
   }, []);
 
+  useEffect(() => {
+    const fetchRegisteredEvents = async () => {
+      const { data: user, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) return;
+
+      const userId = user.user?.id;
+      if (!userId) return;
+
+      const { data, error } = await supabase
+        .from("registrations")
+        .select("event_id, id")
+        .eq("user_id", userId);
+
+      if (!error && data) {
+        const registrations = {};
+        data.forEach((reg) => {
+          registrations[reg.event_id] = reg.id;
+        });
+        setRegisteredEvents(registrations);
+      }
+    };
+
+    fetchRegisteredEvents();
+  }, []);
+
+  // Handle marker click
+  const handleMarkerClick = (eventId) => {
+    if (registeredEvents[eventId]) {
+      navigate(`/afterregistration/${eventId}/${registeredEvents[eventId]}`);
+    } else {
+      navigate(`/registerevent/${eventId}`);
+    }
+  };
+
   return (
-    <div className="w-[70vw] h-[70vh]">
-      <MapContainer center={userLocation || [40.7128, -74.006]} zoom={13} className="w-full h-full">
+    <div className="map-container" style={{ width: "70vw", height: "70vh" }}>
+      <MapContainer center={userLocation || [40.7128, -74.006]} zoom={13} style={{ width: "100%", height: "100%" }}>
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -72,7 +110,13 @@ const Maps = ({ eventLocations, highlightedIds }) => {
             </Tooltip>
             <Popup>
               <strong>{event.title}</strong> <br />
-              {event.description}
+              {event.description} <br />
+              <button
+                className="mt-2 bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition"
+                onClick={() => handleMarkerClick(event.id)}
+              >
+                View Event
+              </button>
             </Popup>
           </Marker>
         ))}

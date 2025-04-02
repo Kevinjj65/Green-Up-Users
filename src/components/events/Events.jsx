@@ -7,7 +7,9 @@ import Footer from "../user/Footer/Footer.jsx";
 const Events = () => {
   const navigate = useNavigate();
   const [events, setEvents] = useState([]);
+  const [filteredEvents, setFilteredEvents] = useState([]); // ✅ Stores events within 10km
   const [isMapView, setIsMapView] = useState(false);
+  const [userLocation, setUserLocation] = useState(null);
   const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY; // ✅ Get API Key from .env file
 
   // Fetch Events with Location Details
@@ -16,7 +18,7 @@ const Events = () => {
       try {
         const { data, error } = await supabase
           .from("events")
-          .select("id, title, images, date, latitude, longitude"); // Removed 'time'
+          .select("id, title, images, date, latitude, longitude");
 
         if (error) throw error;
 
@@ -39,12 +41,48 @@ const Events = () => {
     fetchEvents();
   }, []);
 
-  // Handle Map View Navigation Properly
+  // Get User's Location
   useEffect(() => {
-    if (isMapView) {
-      navigate("/usermaps");
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+        },
+        (error) => console.error("Error getting location:", error.message)
+      );
+    } else {
+      console.error("Geolocation is not supported by this browser.");
     }
-  }, [isMapView, navigate]);
+  }, []);
+
+  // Filter Events Based on 10 km Range
+  useEffect(() => {
+    if (userLocation && events.length > 0) {
+      const filtered = events.filter((event) =>
+        event.latitude && event.longitude &&
+        calculateDistance(userLocation.latitude, userLocation.longitude, event.latitude, event.longitude) <= 10
+      );
+      setFilteredEvents(filtered);
+    }
+  }, [userLocation, events]);
+
+  // Haversine Formula to Calculate Distance Between Two Coordinates
+  function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Radius of Earth in km
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * (Math.PI / 180)) *
+        Math.cos(lat2 * (Math.PI / 180)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in km
+  }
 
   // Function to Convert Lat/Lng to Address using Google Maps API
   async function fetchAddressFromCoordinates(lat, lon) {
@@ -73,22 +111,20 @@ const Events = () => {
         <h1 className="text-xl font-bold">All Events</h1>
 
         <button
-          onClick={() => setIsMapView(!isMapView)}
+         onClick={() => navigate("/usermaps")}
           className="flex items-center justify-center bg-green-500 text-xs px-3 py-1 rounded-md hover:bg-green-600 transition !h-auto !w-auto"
         >
           <ArrowsRightLeftIcon className="h-4 w-4 mr-1" />
           {isMapView ? "Events View" : "Map View"}
         </button>
-
-
       </header>
 
       {/* Events List */}
       <div className="p-6 overflow-x-auto">
         <h2 className="text-3xl font-semibold mb-4">Upcoming Events</h2>
         <div className="flex space-x-6 overflow-x-scroll scrollbar-hide">
-          {events.length > 0 ? (
-            events.map((event) => (
+          {filteredEvents.length > 0 ? (
+            filteredEvents.map((event) => (
               <div
                 key={event.id}
                 className="bg-green-200 p-4 rounded-lg shadow-md w-64 cursor-pointer hover:bg-green-300 transition"
@@ -115,7 +151,7 @@ const Events = () => {
               </div>
             ))
           ) : (
-            <p className="text-gray-500">No events available.</p>
+            <p className="text-gray-500">No events available within 10 km.</p>
           )}
         </div>
       </div>

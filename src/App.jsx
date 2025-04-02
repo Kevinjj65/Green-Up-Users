@@ -38,7 +38,7 @@ import RegisteredEvents from "./components/user/RegisteredEvents/RegisteredEvent
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/events" element={<Events />} />
-          <Route path="/registerevent" element={<RegisterEvent />} />
+          {/* <Route path="/registerevent" element={<RegisterEvent />} /> */}
           <Route path="/userlogin" element={<LLogin />} />
           <Route path="/usersignup" element={<SSignup />} />
           <Route path="/usermaps" element={<UserMaps />} />
