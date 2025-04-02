@@ -16,6 +16,7 @@ import OrganizerProfile from "./components/organizer/OrganizerProfile.jsx";
 import EventDetailsOrg from "./components/organizer/EventDetailsOrg.jsx";
 import OrganizerChatList from "./components/organizer/OrganizerChatList.jsx";
 import OrganizerChat from "./components/organizer/OrganizerChat.jsx";
+import EditEvent from './components/organizer/EditEvents.jsx'
 
 // User Components
 import RegisterEvent from "./components/user/RegisterEvent/RegisterEvent.jsx";
@@ -50,6 +51,7 @@ import RewardPoints from "./components/user/RewardPoints/RewardPoints.jsx";
           <Route path="/organizer/profile" element={<OrganizerProfile />} />
         <Route path="/organizer/events" element={<OrganizerEvents />} />
         <Route path="/organizer/event/:id" element={<EventDetailsOrg />} />
+        <Route path="/edit/:id" element={<EditEvent />} />
         <Route path="/organizenew" element={<AddNew />} />
         <Route path="/organizerlogin" element={<Login />} />
         <Route path="/orgmaps" element={<OrgMaps />} />
