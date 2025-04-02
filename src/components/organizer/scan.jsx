@@ -45,13 +45,30 @@ const QRScanner = ({ eventId }) => {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "environment" },
       });
-      videoRef.current.srcObject = stream;
-      setIsCameraActive(true);
-      requestAnimationFrame(scanCamera);
+      setIsCameraActive(true); // Set this first to render the video element
     } catch (err) {
       setError("Failed to access camera: " + err.message);
     }
   };
+
+  // Effect to set the stream once the video element is ready
+  useEffect(() => {
+    if (isCameraActive && videoRef.current) {
+      const startStream = async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "environment" },
+          });
+          videoRef.current.srcObject = stream;
+          requestAnimationFrame(scanCamera);
+        } catch (err) {
+          setError("Failed to access camera: " + err.message);
+          setIsCameraActive(false); // Reset if it fails
+        }
+      };
+      startStream();
+    }
+  }, [isCameraActive]);
 
   // Stop camera
   const stopCamera = () => {
@@ -165,9 +182,7 @@ const QRScanner = ({ eventId }) => {
 
   return (
     <div className="min-h-screen flex flex-col items-center pb-20">
-      {/* Added pb-20 to ensure padding at the bottom for footer clearance */}
       <div className="w-full max-w-md flex flex-col items-center space-y-6 overflow-y-auto">
-        {/* max-w-md limits width, overflow-y-auto enables scrolling */}
         <h2 className="text-xl font-semibold mt-4">QR Code Scanner</h2>
 
         {/* File Upload for QR Code */}
