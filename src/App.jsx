@@ -25,7 +25,7 @@ import UserMaps from "./components/user/Map/EventsMap.jsx";
 import AfterRegistration from "./components/user/AfterRegistration/AfterRegistration.jsx";
 import UserProfile from "./components/user/UserProfile/UserProfile.jsx";
 import RegisteredEvents from "./components/user/RegisteredEvents/RegisteredEvents.jsx";
-
+import AllEvents from "./components/user/allevents/AllEvents.jsx";
  function App() {
 
 
@@ -42,6 +42,7 @@ import RegisteredEvents from "./components/user/RegisteredEvents/RegisteredEvent
           <Route path="/userlogin" element={<LLogin />} />
           <Route path="/usersignup" element={<SSignup />} />
           <Route path="/usermaps" element={<UserMaps />} />
+          <Route path="/allevents" element={<AllEvents />} />
           <Route path="/userprofile" element={<UserProfile />} />
           <Route path="/registerevent/:id" element={<RegisterEvent />} />
           <Route path="/organizer/profile" element={<OrganizerProfile />} />

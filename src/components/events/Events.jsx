@@ -3,16 +3,55 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../../services/supabaseClient.jsx";
 import { MapPinIcon, ClockIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/solid";
 import Footer from "../user/Footer/Footer.jsx";
+import AdModal from "../authentication/ads/AdModal.jsx"; // ✅ Imported AdModal
 
 const Events = () => {
   const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]); // ✅ Stores events within 10km
   const [isMapView, setIsMapView] = useState(false);
-
   const [userLocation, setUserLocation] = useState(null);
   const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY; // ✅ Get API Key from .env file
 
+  // ✅ Ad State
+  const [showAd, setShowAd] = useState(false);
+  const [ad, setAd] = useState(null);
+
+  // ✅ Hardcoded Study Ads
+  const studyAds = [
+    {
+      id: 1,
+      title: "📖 Free Coding Bootcamp!",
+      description: "Learn Python & JavaScript for free. Limited spots available!",
+      buttonText: "Join Now",
+      link: "https://example.com/coding-bootcamp",
+    },
+    {
+      id: 2,
+      title: "📚 Discount on Programming Books!",
+      description: "Get up to 50% off on top programming books.",
+      buttonText: "Shop Now",
+      link: "https://example.com/programming-books",
+    },
+    {
+      id: 3,
+      title: "💡 AI for Beginners - Free Course",
+      description: "Start learning AI and Machine Learning today for free!",
+      buttonText: "Enroll Now",
+      link: "https://example.com/ai-course",
+    },
+  ];
+
+  // ✅ Show Random Study Ad (Max 3 times per day)
+  useEffect(() => {
+    const adsShownToday = localStorage.getItem("adsShown") || "0";
+    if (parseInt(adsShownToday) < 3) {
+      const randomAd = studyAds[Math.floor(Math.random() * studyAds.length)];
+      setAd(randomAd);
+      setShowAd(true);
+      localStorage.setItem("adsShown", parseInt(adsShownToday) + 1);
+    }
+  }, []);
 
   // Fetch Events with Location Details
   useEffect(() => {
@@ -117,16 +156,13 @@ const Events = () => {
 
         {/* Toggle Button - With max width */}
         <button
-
-         onClick={() => navigate("/usermaps")}
+          onClick={() => navigate("/usermaps")}
           className="flex items-center justify-center bg-green-500 text-xs px-3 py-1 rounded-md hover:bg-green-600 transition !h-auto !w-auto"
-
         >
           <ArrowsRightLeftIcon className="h-3 w-3 mr-1" />
           {isMapView ? "Events View" : "Map View"}
         </button>
       </header>
-
 
       {/* Events List */}
       <div className="p-6 overflow-x-auto">
@@ -134,7 +170,6 @@ const Events = () => {
         <div className="flex space-x-6 overflow-x-scroll scrollbar-hide">
           {filteredEvents.length > 0 ? (
             filteredEvents.map((event) => (
-
               <div
                 key={event.id}
                 className="bg-green-200 p-4 rounded-lg shadow-md cursor-pointer hover:bg-green-300 transition"
@@ -159,7 +194,6 @@ const Events = () => {
                   </div>
                 </div>
               </div>
-
             ))
           ) : (
             <p className="text-gray-500">No events available within 10 km.</p>
@@ -167,6 +201,8 @@ const Events = () => {
         </div>
       </div>
 
+      {/* ✅ Show Ad Modal */}
+      {showAd && <AdModal ad={ad} onClose={() => setShowAd(false)} />}
 
       {/* Footer */}
       <Footer />

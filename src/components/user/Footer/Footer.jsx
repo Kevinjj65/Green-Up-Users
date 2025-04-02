@@ -21,7 +21,7 @@ const Footer = () => {
       >
         <img src={registeredEvents} alt="Registered Events" className="w-6 h-6 object-contain" />
       </div>
-      <div className="w-12 h-12 rounded-full bg-[#39FF14] flex justify-center items-center border border-white p-2">
+      <div className="w-12 h-12 rounded-full bg-[#39FF14] flex justify-center items-center border border-white p-2" onClick={() => navigate("/allevents")}>
         <img src={nearbyEvents} alt="Nearby Events" className="w-6 h-6 object-contain" />
       </div>
       <div 
