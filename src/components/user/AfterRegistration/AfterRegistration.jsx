@@ -9,7 +9,8 @@ const AfterRegistration = () => {
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [eventAddress, setEventAddress] = useState("Fetching location...");
-  const [organizerId, setOrganizerId] = useState(null); // State to store the organizer_id
+  const [organizerId, setOrganizerId] = useState(null);
+  const [showModal, setShowModal] = useState(false); // Modal state
 
   console.log("Received eventId:", eventId, "attendeeId:", attendeeId);
 
@@ -32,7 +33,7 @@ const AfterRegistration = () => {
 
         if (error) throw error;
         setEvent(data);
-        setOrganizerId(data.organizer_id); // Set the organizer_id here
+        setOrganizerId(data.organizer_id);
 
         if (data.latitude && data.longitude) {
           fetchAddressFromCoordinates(data.latitude, data.longitude);
@@ -74,6 +75,27 @@ const AfterRegistration = () => {
     }
   }
 
+  // Function to unregister from the event
+  const handleUnregister = async () => {
+    if (!eventId || !attendeeId) return;
+
+    try {
+      const { error } = await supabase
+        .from("registrations")
+        .delete()
+        .eq("event_id", eventId)
+        .eq("attendee_id", attendeeId);
+
+      if (error) throw error;
+
+      alert("Successfully unregistered from the event!");
+      navigate("/events");
+    } catch (error) {
+      console.error("Error unregistering:", error.message);
+      alert("Error unregistering. Please try again.");
+    }
+  };
+
   if (!event) return <p>Loading event details...</p>;
 
   return (
@@ -98,11 +120,42 @@ const AfterRegistration = () => {
       {/* Chat Button to navigate to chat page with event creator */}
       {organizerId && (
         <button
-          onClick={() => navigate(`/chat/${organizerId}/${eventId}/${attendeeId}`)} // Updated URL with attendeeId
+          onClick={() => navigate(`/chat/${organizerId}/${eventId}/${attendeeId}`)}
           className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-all"
         >
           Chat with Event Creator
         </button>
+      )}
+
+      {/* Unregister Button */}
+      <button
+        onClick={() => setShowModal(true)}
+        className="mt-6 px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-all"
+      >
+        Unregister from Event
+      </button>
+
+      {/* Confirmation Modal */}
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-md text-center">
+            <p className="text-lg font-semibold">Are you sure you want to unregister from "{event.title}"?</p>
+            <div className="flex justify-center gap-4 mt-4">
+              <button
+                onClick={handleUnregister}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-all"
+              >
+                Yes, Unregister
+              </button>
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500 transition-all"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       <Footer />
