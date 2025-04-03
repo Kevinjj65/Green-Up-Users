@@ -24,10 +24,10 @@ function UserProfile() {
 
       const userId = authUser.user.id;
 
-      // Fetch user details
+      // Fetch user details including reward_points from participants table
       const { data: userData, error: userError } = await supabase
         .from("participants")
-        .select("id, name, email_id, phone_number")
+        .select("id, name, email_id, phone_number, reward_points")
         .eq("id", userId)
         .single();
 
@@ -37,36 +37,7 @@ function UserProfile() {
         return;
       }
 
-      // Fetch reward points by summing up points_awarded from the registrations table
-      const { data: pointsData, error: pointsError } = await supabase
-        .from("registrations")
-        .select("points_awarded")
-        .eq("attendee_id", userId);
-
-      let totalPoints = 0;
-      if (pointsData) {
-        totalPoints = pointsData.reduce((sum, entry) => sum + (entry.points_awarded || 0), 0);
-      }
-
-      if (pointsError) {
-        setError("Failed to fetch reward points.");
-        setLoading(false);
-        return;
-      }
-
-      // Update reward points in participants table
-      const { error: updateError } = await supabase
-        .from("participants")
-        .update({ reward_points: totalPoints })
-        .eq("id", userId);
-
-      if (updateError) {
-        setError("Failed to update reward points.");
-        setLoading(false);
-        return;
-      }
-
-      setUser({ id: userId, ...userData, reward_points: totalPoints });
+      setUser({ id: userId, ...userData });
       setLoading(false);
     };
 

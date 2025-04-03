@@ -173,11 +173,39 @@ const QRScanner = ({ eventId }) => {
           return;
         }
 
+        // Update registrations table
         await supabase
           .from("registrations")
           .update({ check_out_time: currentTime, points_awarded: parsedPoints })
           .eq("attendee_id", attendeeId)
           .eq("event_id", eventId);
+
+        // Fetch current reward_points from participants table
+        const { data: participantData, error: participantError } = await supabase
+          .from("participants")
+          .select("reward_points")
+          .eq("id", attendeeId)
+          .single();
+
+        if (participantError) {
+          setError("Error fetching participant's reward points.");
+          return;
+        }
+
+        // Calculate new total reward points
+        const currentRewardPoints = participantData.reward_points || 0; // Default to 0 if null
+        const newTotalPoints = currentRewardPoints + parsedPoints;
+
+        // Update participants table with new total
+        const { error: updateError } = await supabase
+          .from("participants")
+          .update({ reward_points: newTotalPoints })
+          .eq("id", attendeeId);
+
+        if (updateError) {
+          setError("Error updating participant's reward points.");
+          return;
+        }
 
         setScanResult((prev) => ({
           ...prev,
