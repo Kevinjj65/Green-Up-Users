@@ -8,7 +8,7 @@ function SplashScreen() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigate("/"); // Change "/home" to your actual homepage route
+      navigate("/home"); // Change "/home" to your actual homepage route
     }, 4000);
 
     return () => clearTimeout(timer); // Cleanup function to prevent memory leaks

@@ -4,16 +4,29 @@ import { supabase } from "../../../services/supabaseClient.jsx"; // Adjust path 
 import Footer from "../Footer/Footer";
 
 // ✅ Rectangle component to display event details
-function EventRectangle({ event, userId }) {
+function EventRectangle({ event, userId, checkOutTime }) {
   const navigate = useNavigate();
+  const eventDate = new Date(event.date);
+  const today = new Date();
+
+  let bgColor = "bg-[#2A2A2A]"; // Default background
+
+  if (eventDate > today) {
+    bgColor = "bg-[#2A5D09]"; // ✅ Future event (Green)
+  } else if (!checkOutTime) {
+    bgColor = "bg-[#FF0000]"; // ✅ Past event without check_out_time (Red)
+  }
 
   return (
     <div
-      className="bg-[#2A2A2A] p-4 rounded-md mb-4 w-full h-24 flex flex-col justify-center items-start border border-white cursor-pointer hover:bg-[#3A3A3A] transition"
+      className={`${bgColor} p-4 rounded-md mb-4 w-full h-24 flex flex-col justify-center items-start border border-white cursor-pointer hover:bg-[#3A3A3A] transition`}
       onClick={() => navigate(`/afterregistration/${event.id}/${userId}`)} // ✅ Navigate on click
     >
       <p className="text-lg font-semibold text-white">{event.title}</p>
       <p className="text-sm text-gray-400">{event.date}</p>
+      {checkOutTime && (
+        <p className="text-xs text-gray-300">Checked out at: {checkOutTime}</p> // ✅ Display check-out time if available
+      )}
     </div>
   );
 }
@@ -40,17 +53,21 @@ function RegisteredEvents() {
 
       setUserId(authData.user.id); // ✅ Store user ID
 
-      // ✅ Fetch registered events from "registrations" table with event details
+      // ✅ Fetch registered events from "registrations" table with event details and check_out_time
       const { data, error: fetchError } = await supabase
         .from("registrations")
-        .select("event_id, events(id, title, date)") // ✅ Ensure event ID is included
+        .select("event_id, check_out_time, events(id, title, date)") // ✅ Ensure check_out_time is included
         .eq("attendee_id", authData.user.id);
 
       if (fetchError) {
         console.error("Supabase Error:", fetchError);
         setError("Failed to fetch registered events.");
       } else {
-        setEvents(data || []);
+        // ✅ Sort events in newest-first order (latest on top)
+        const sortedEvents = (data || []).sort(
+          (a, b) => new Date(b.events.date) - new Date(a.events.date)
+        );
+        setEvents(sortedEvents);
       }
 
       setLoading(false);
@@ -60,14 +77,14 @@ function RegisteredEvents() {
   }, []);
 
   return (
-    <div className="bg-[#1E1E1E] w-screen min-h-screen flex flex-col text-white py-10 pt-24 pb-24">
-      {/* Title fixed at the top */}
-      <h1 className="text-2xl font-bold text-center fixed top-0 left-0 right-0 bg-[#1E1E1E] p-4 z-10">
+    <div className="bg-[#1E1E1E] w-screen min-h-screen flex flex-col text-white py-10 pb-24">
+      {/* Title (No longer sticky) */}
+      <h1 className="text-2xl font-bold text-center mb-6">
         Registered Events
       </h1>
 
       {/* Events List */}
-      <div className="w-[80%] max-w-lg mx-auto mt-28">
+      <div className="w-[80%] max-w-lg mx-auto">
         {loading ? (
           <p className="text-gray-400">Loading events...</p>
         ) : error ? (
@@ -76,7 +93,12 @@ function RegisteredEvents() {
           <p className="text-gray-400">No registered events found.</p>
         ) : (
           events.map((event, index) => (
-            <EventRectangle key={index} event={event.events} userId={userId} /> // ✅ Pass userId to EventRectangle
+            <EventRectangle
+              key={index}
+              event={event.events}
+              userId={userId}
+              checkOutTime={event.check_out_time} // ✅ Pass check_out_time to EventRectangle
+            />
           ))
         )}
       </div>

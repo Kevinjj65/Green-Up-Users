@@ -4,7 +4,6 @@ import { supabase } from "../../../services/supabaseClient.jsx";
 import {
   MapPinIcon,
   ClockIcon,
-  ArrowsRightLeftIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/solid";
 import Footer from "../Footer/Footer.jsx";
@@ -83,9 +82,9 @@ const AllEvents = () => {
     });
 
   return (
-    <div className="min-h-screen bg-green-50 text-green-900">
+    <div className="min-h-screen bg-[#1e1e1e] text-white flex flex-col">
       {/* Header */}
-      <header className="bg-green-700 py-4 px-6 flex items-center justify-between text-white sticky top-0 z-10">
+      <header className="bg-[#1e1e1e] py-4 px-6 flex items-center justify-between text-white sticky top-0 z-10">
         <h1 className="text-xl font-bold">All Events</h1>
 
         {/* Search Bar */}
@@ -114,36 +113,38 @@ const AllEvents = () => {
       </header>
 
       {/* Events List */}
-      <div className="p-6 overflow-x-auto">
+      <div className="p-6 flex-1 mb-20">
         <h2 className="text-3xl font-semibold mb-4">Upcoming Events</h2>
-        <div className="flex space-x-6 overflow-x-scroll scrollbar-hide">
+        <div className="grid grid-cols-2 gap-6">
           {filteredEvents.length > 0 ? (
             filteredEvents.map((event) => (
               <div
                 key={event.id}
-                className="bg-green-200 p-4 rounded-lg shadow-md w-64 cursor-pointer hover:bg-green-300 transition"
+                className="bg-[#1e1e1e] p-4 rounded-lg shadow-md cursor-pointer hover:bg-[#2a2a2a] transition"
                 onClick={() => navigate(`/registerevent/${event.id}`)}
               >
                 <img
                   src={event.images}
                   alt={event.title}
-                  className="w-full h-32 object-cover rounded-t-lg"
+                  className="w-full h-40 object-cover rounded-t-lg"
                 />
-                <h3 className="text-lg font-semibold mt-2 text-center">{event.title}</h3>
-                <div className="mt-2 text-sm flex flex-col space-y-1">
+                <h3 className="text-lg font-semibold mt-2 text-center text-[#f5f5f5]">
+                  {event.title}
+                </h3>
+                <div className="mt-2 text-sm flex flex-col space-y-1 text-[#f5f5f5]">
                   {/* 📅 Event Date */}
                   <div className="flex items-center">
-                    <ClockIcon className="h-5 w-5 text-green-700 mr-2" />
+                    <ClockIcon className="h-5 w-5 text-green-500 mr-2" />
                     <span>{event.date}</span>
                   </div>
                   {/* 📍 Event Location */}
                   <div className="flex items-center">
-                    <MapPinIcon className="h-5 w-5 text-red-600 mr-2" />
+                    <MapPinIcon className="h-5 w-5 text-red-500 mr-2" />
                     <span>{event.address}</span>
                   </div>
                   {/* 🏆 Reward Points */}
                   <div className="flex items-center">
-                    <span className="bg-yellow-300 text-yellow-800 px-2 py-1 rounded text-xs font-bold">
+                    <span className="bg-yellow-400 text-yellow-900 px-2 py-1 rounded text-xs font-bold">
                       {event.reward_points} Points
                     </span>
                   </div>
@@ -151,7 +152,7 @@ const AllEvents = () => {
               </div>
             ))
           ) : (
-            <p className="text-gray-500">No events found.</p>
+            <p className="text-gray-400">No events found.</p>
           )}
         </div>
       </div>

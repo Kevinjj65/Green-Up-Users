@@ -28,16 +28,12 @@ function RegisterEvent() {
       }
       const userId = user.user.id;
 
-      const { data: registration, error: regError } = await supabase
+      const { data: registration } = await supabase
         .from("registrations")
         .select("id, event_id, attendee_id")
         .eq("event_id", id)
         .eq("attendee_id", userId)
         .maybeSingle();
-
-      if (regError) {
-        console.error("Error fetching registration:", regError.message);
-      }
 
       if (registration) {
         navigate(`/afterregistration/${id}/${userId}`);
@@ -116,26 +112,26 @@ function RegisterEvent() {
     setRegistering(false);
   }
 
-  if (loading) return <p>Loading event details...</p>;
-  if (!eventData) return <p>Event not found.</p>;
+  if (loading) return <p className="text-[#F5F5F5]">Loading event details...</p>;
+  if (!eventData) return <p className="text-[#F5F5F5]">Event not found.</p>;
 
   return (
     <>
-      <main className="flex flex-col items-center bg-gray-900 text-green-400 w-full min-h-screen py-6">
+      <main className="flex flex-col items-center justify-center bg-[#1E1E1E] text-[#F5F5F5] w-full min-h-screen py-6">
         <Location latitude={eventData.latitude} longitude={eventData.longitude} />
-        <div className="w-full max-w-lg bg-gray-800 p-6 rounded-lg shadow-lg text-center">
+        <div className="w-full max-w-lg bg-[#1E1E1E] p-6 rounded-lg shadow-lg text-center">
           <img className="w-full h-40 object-cover rounded-lg" src={eventData.images} alt="Event" />
           <h1 className="text-2xl font-bold mt-4">{eventData.title}</h1>
-          <p className="mt-2 text-lg text-gray-300">{eventData.description}</p>
-          <div className="flex items-center justify-center mt-4 text-gray-400">
+          <p className="mt-2 text-lg text-[#F5F5F5]">{eventData.description}</p>
+          <div className="flex items-center justify-center mt-4 text-[#F5F5F5]">
             <img src={dateicon} alt="Date Icon" className="w-5 h-5 mr-2" />
             <p>{new Date(eventData.date).toLocaleDateString()}</p>
           </div>
-          <div className="flex items-center justify-center mt-2 text-gray-400">
+          <div className="flex items-center justify-center mt-2 text-[#F5F5F5]">
             <img src={timeicon} alt="Time Icon" className="w-5 h-5 mr-2" />
             <p>{eventData.start_time} - {eventData.end_time}</p>
           </div>
-          <div className="flex items-center justify-center mt-2 text-gray-400">
+          <div className="flex items-center justify-center mt-2 text-[#F5F5F5]">
             <img src={locationicon} alt="Location Icon" className="w-5 h-5 mr-2" />
             <p>{eventAddress}</p>
           </div>
@@ -146,7 +142,7 @@ function RegisterEvent() {
           >
             {registering ? "Registering..." : "Register Now"}
           </button>
-          {registrationMessage && <p className="mt-2 text-sm text-white">{registrationMessage}</p>}
+          {registrationMessage && <p className="mt-2 text-sm text-[#F5F5F5]">{registrationMessage}</p>}
         </div>
       </main>
       <Footer />

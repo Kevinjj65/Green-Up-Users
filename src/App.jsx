@@ -41,7 +41,7 @@ import Redeem from "./components/user/Redeem/Redeem.jsx";
       {/* Routing Setup */}
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/events" element={<Events />} />
           {/* <Route path="/registerevent" element={<RegisterEvent />} /> */}
           <Route path="/userlogin" element={<LLogin />} />
@@ -65,7 +65,7 @@ import Redeem from "./components/user/Redeem/Redeem.jsx";
           <Route path="/organizer/event/:eventId/chat" element={<OrganizerChatList />} />
           <Route path="/organizer/chat/:eventId/:attendeeId" element={<OrganizerChat />} />
           <Route path="/rewardpoints/:attendee_id" element={<RewardPoints />} />  
-          <Route path="/logo" element={<SplashScreen />} />
+          <Route path="/" element={<SplashScreen />} />
           <Route path="/redeem/:event_id/:attendee_id" element={<Redeem />} />
         </Routes>
       </BrowserRouter>
