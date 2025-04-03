@@ -146,7 +146,7 @@ function AddNew() {
                     reward_points: Number(eventData.reward_points),
                     images: eventData.image_url,
                     organizer_id: organizerId,
-                    location: eventData.location // Store the original input
+                    
                 }
             ]);
 
