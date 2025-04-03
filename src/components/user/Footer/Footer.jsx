@@ -11,7 +11,7 @@ const Footer = () => {
     <footer className="w-full h-[10vh] bg-[#2A2A2A] fixed bottom-0 left-0 flex justify-between items-center px-[10%]">
       <div 
         className="w-12 h-12 rounded-full bg-[#39FF14] flex justify-center items-center border border-white p-2 cursor-pointer" 
-        onClick={() => navigate("/events")}
+        onClick={() => navigate("/allevents")}
       >
         <img src={viewAll} alt="View All" className="w-6 h-6 object-contain" />
       </div>
@@ -21,7 +21,7 @@ const Footer = () => {
       >
         <img src={registeredEvents} alt="Registered Events" className="w-6 h-6 object-contain" />
       </div>
-      <div className="w-12 h-12 rounded-full bg-[#39FF14] flex justify-center items-center border border-white p-2" onClick={() => navigate("/allevents")}>
+      <div className="w-12 h-12 rounded-full bg-[#39FF14] flex justify-center items-center border border-white p-2" onClick={() => navigate("/events")}>
         <img src={nearbyEvents} alt="Nearby Events" className="w-6 h-6 object-contain" />
       </div>
       <div 

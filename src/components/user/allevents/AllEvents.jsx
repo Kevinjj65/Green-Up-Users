@@ -67,7 +67,9 @@ const AllEvents = () => {
 
   // Filter & Search Logic
   const filteredEvents = events
-    .filter(
+  .filter((event) => new Date(event.date) >= new Date())
+    .filter
+    (
       (event) =>
         event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         event.address.toLowerCase().includes(searchQuery.toLowerCase())

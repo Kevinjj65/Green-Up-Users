@@ -146,18 +146,16 @@ const Events = () => {
   }
 
   return (
-    <div className="bg-green-50 min-h-screen flex flex-col">
-      {/* Sticky Header (No Text Overflow) */}
-      <header className="bg-green-700 py-4 px-6 flex items-center justify-between text-white sticky top-0 left-0 right-0 z-10 h-16 overflow-hidden">
-        {/* Title - With max width */}
-        <h1 className="text-xl font-bold truncate flex-1 max-w-[30vw]">
+    <div className="bg-[#1e1e1e] min-h-screen flex flex-col">
+      {/* Sticky Header with Updated Background */}
+      <header className="bg-[#1e1e1e] py-4 px-6 flex items-center justify-between text-white sticky top-0 left-0 right-0 z-10 h-16">
+        <h1 className="text-xl font-bold truncate flex-1">
           All Events
         </h1>
 
-        {/* Toggle Button - With max width */}
         <button
           onClick={() => navigate("/usermaps")}
-          className="flex items-center justify-center bg-green-500 text-xs px-3 py-1 rounded-md hover:bg-green-600 transition !h-auto !w-auto"
+          className="flex items-center justify-center bg-green-500 text-xs px-3 py-1 rounded-md hover:bg-green-600 transition"
         >
           <ArrowsRightLeftIcon className="h-3 w-3 mr-1" />
           {isMapView ? "Events View" : "Map View"}
@@ -165,14 +163,14 @@ const Events = () => {
       </header>
 
       {/* Events List */}
-      <div className="p-6 overflow-x-auto">
-        <h2 className="text-3xl font-semibold mb-4">Upcoming Events</h2>
-        <div className="flex space-x-6 overflow-x-scroll scrollbar-hide">
+      <div className="p-6 overflow-y-auto max-h-[80vh]">
+        <h2 className="text-3xl font-semibold mb-4 text-white">Upcoming Events</h2>
+        <div className="grid grid-cols-2 gap-4">
           {filteredEvents.length > 0 ? (
             filteredEvents.map((event) => (
               <div
                 key={event.id}
-                className="bg-green-200 p-4 rounded-lg shadow-md cursor-pointer hover:bg-green-300 transition"
+                className="bg-[#1e1e1e] p-4 rounded-lg shadow-md cursor-pointer hover:bg-gray-800 transition"
                 onClick={() => navigate(`/registerevent/${event.id}`)}
               >
                 <img
@@ -180,31 +178,26 @@ const Events = () => {
                   alt={event.title}
                   className="w-full h-40 object-cover rounded-t-lg"
                 />
-                <h3 className="text-lg font-semibold mt-2 text-center truncate max-w-full">{event.title}</h3>
-                <div className="mt-2 text-sm flex flex-col space-y-1">
-                  {/* 📅 Event Date */}
+                <h3 className="text-lg font-semibold mt-2 text-center text-white">{event.title}</h3>
+                <div className="mt-2 text-sm flex flex-col space-y-1 text-gray-400">
                   <div className="flex items-center">
-                    <ClockIcon className="h-5 w-5 text-green-700 mr-2" />
-                    <span className="truncate max-w-full">{event.date}</span>
+                    <ClockIcon className="h-5 w-5 text-green-500 mr-2" />
+                    <span>{event.date}</span>
                   </div>
-                  {/* 📍 Event Location */}
                   <div className="flex items-center">
-                    <MapPinIcon className="h-5 w-5 text-red-600 mr-2" />
-                    <span className="truncate max-w-full">{event.address}</span>
+                    <MapPinIcon className="h-5 w-5 text-red-500 mr-2" />
+                    <span>{event.address}</span>
                   </div>
                 </div>
               </div>
             ))
           ) : (
-            <p className="text-gray-500">No events available within 10 km.</p>
+            <p className="text-gray-400">No events available within 10 km.</p>
           )}
         </div>
       </div>
 
-      {/* ✅ Show Ad Modal */}
       {showAd && <AdModal ad={ad} onClose={() => setShowAd(false)} />}
-
-      {/* Footer */}
       <Footer />
     </div>
   );

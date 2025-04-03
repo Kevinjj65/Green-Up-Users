@@ -24,19 +24,20 @@ function UserProfile() {
 
       const userId = authUser.user.id;
 
-      // Fetch user details
+      // Fetch user details including reward_points from participants table
       const { data: userData, error: userError } = await supabase
         .from("participants")
-        .select("name, email_id, phone_number, reward_points")
+        .select("id, name, email_id, phone_number, reward_points")
         .eq("id", userId)
         .single();
 
       if (userError) {
         setError("Failed to fetch user data.");
-      } else {
-        setUser(userData);
+        setLoading(false);
+        return;
       }
 
+      setUser({ id: userId, ...userData });
       setLoading(false);
     };
 
@@ -49,10 +50,12 @@ function UserProfile() {
     window.location.reload();
   };
 
-  // Navigate to Reward Points Page
+  // Navigate to Reward Points Page with attendee_id
   const handlePointsClick = () => {
-    if (user) {
-      navigate(`/rewardpoints`);
+    if (user?.id) {
+      navigate(`/rewardpoints/${user.id}`);
+    } else {
+      console.error("User ID is undefined!");
     }
   };
 
