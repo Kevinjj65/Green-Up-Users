@@ -127,7 +127,8 @@ const AfterRegistration = () => {
   if (!event) return <p>Loading event details...</p>;
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
+    <div className="h-screen w-screen overflow-hidden flex flex-col items-center justify-between p-4">
+
       <button
         onClick={() => navigate("/events")}
         className="self-start mb-6 px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 transition"
@@ -138,7 +139,7 @@ const AfterRegistration = () => {
       <div className="w-full max-w-3xl bg-white shadow-lg rounded-lg p-6">
         {/* Event Details Box */}
         <div className="border-b pb-4 mb-4">
-          <h1 className="text-3xl font-bold text-gray-800 text-center">{event.title}</h1>
+          <h1 className="text-3xl font-bold text-gray-800 text-center mt-0">{event.title}</h1>
           <p className="text-gray-600 text-center mt-2">{event.description}</p>
         </div>
 
@@ -179,7 +180,7 @@ const AfterRegistration = () => {
 
           <button
             onClick={() => setShowModal(true)}
-            className="w-full max-w-md px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-all"
+            className="w-full max-w-md px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-all mb-36"
           >
             Unregister from Event
           </button>
