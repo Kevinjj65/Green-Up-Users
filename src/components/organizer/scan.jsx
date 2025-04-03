@@ -134,7 +134,7 @@ const QRScanner = ({ eventId }) => {
         .single();
 
       if (regError) {
-        setError("Error fetching registration details.");
+        setError(`Error fetching registration details: ${regError.message}`);
         return;
       }
 
@@ -160,7 +160,7 @@ const QRScanner = ({ eventId }) => {
           .single();
 
         if (eventError || !eventData) {
-          setError("Error retrieving reward points.");
+          setError(`Error retrieving event reward points: ${eventError?.message || "No data"}`);
           return;
         }
 
@@ -174,11 +174,16 @@ const QRScanner = ({ eventId }) => {
         }
 
         // Update registrations table
-        await supabase
+        const { error: regUpdateError } = await supabase
           .from("registrations")
           .update({ check_out_time: currentTime, points_awarded: parsedPoints })
           .eq("attendee_id", attendeeId)
           .eq("event_id", eventId);
+
+        if (regUpdateError) {
+          setError(`Error updating registrations: ${regUpdateError.message}`);
+          return;
+        }
 
         // Fetch current reward_points from participants table
         const { data: participantData, error: participantError } = await supabase
@@ -188,7 +193,7 @@ const QRScanner = ({ eventId }) => {
           .single();
 
         if (participantError) {
-          setError("Error fetching participant's reward points.");
+          setError(`Error fetching participant's reward points: ${participantError.message}`);
           return;
         }
 
@@ -196,16 +201,22 @@ const QRScanner = ({ eventId }) => {
         const currentRewardPoints = participantData.reward_points || 0; // Default to 0 if null
         const newTotalPoints = currentRewardPoints + parsedPoints;
 
+        console.log(`Updating participant ${attendeeId}: Current Points: ${currentRewardPoints}, New Points: ${parsedPoints}, Total: ${newTotalPoints}`);
+
         // Update participants table with new total
-        const { error: updateError } = await supabase
+        const { data: updatedParticipant, error: updateError } = await supabase
           .from("participants")
           .update({ reward_points: newTotalPoints })
-          .eq("id", attendeeId);
+          .eq("id", attendeeId)
+          .select(); // Return the updated row for verification
 
         if (updateError) {
-          setError("Error updating participant's reward points.");
+          setError(`Error updating participant's reward points: ${updateError.message}`);
+          console.error("Update error details:", updateError);
           return;
         }
+
+        console.log("Successfully updated participant:", updatedParticipant);
 
         setScanResult((prev) => ({
           ...prev,
@@ -217,7 +228,8 @@ const QRScanner = ({ eventId }) => {
         setError("This user has already checked in and out.");
       }
     } catch (err) {
-      setError("Database update failed.");
+      setError(`Database update failed: ${err.message}`);
+      console.error("Unexpected error:", err);
     }
   };
 
