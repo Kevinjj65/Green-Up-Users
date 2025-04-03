@@ -27,7 +27,7 @@ const AfterRegistration = () => {
       try {
         const { data, error } = await supabase
           .from("events")
-          .select("title, description, latitude, longitude, organizer_id")
+          .select("title, description, date, start_time, end_time, reward_points, latitude, longitude, organizer_id")
           .eq("id", eventId)
           .single();
 
@@ -75,6 +75,34 @@ const AfterRegistration = () => {
     }
   }
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "N/A";
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("en-US", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }).replace(/\b(\d{1,2})\b/, (match) => {
+      const suffix = ["th", "st", "nd", "rd"][
+        (match % 10 > 3 || Math.floor((match % 100) / 10) === 1) ? 0 : match % 10
+      ];
+      return match + suffix;
+    });
+  };
+  
+  const convertToIST = (timeStr) => {
+    if (!timeStr) return "N/A";
+    const dateTime = new Date(`1970-01-01T${timeStr}Z`); // Append date and make it UTC
+    return dateTime.toLocaleTimeString("en-IN", { 
+      hour: "2-digit", 
+      minute: "2-digit", 
+      hour12: true, 
+      timeZone: "Asia/Kolkata" 
+    });
+  };
+  
+  
+
   // Function to unregister from the event
   const handleUnregister = async () => {
     if (!eventId || !attendeeId) return;
@@ -99,46 +127,69 @@ const AfterRegistration = () => {
   if (!event) return <p>Loading event details...</p>;
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
       <button
         onClick={() => navigate("/events")}
-        className="self-start ml-4 mt-4 px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 transition"
+        className="self-start mb-6 px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 transition"
       >
         ← Back to Events
       </button>
 
-      <h1 className="text-2xl font-bold mt-4">{event.title}</h1>
-      <p>{event.description}</p>
-      <p>📍 {eventAddress}</p>
+      <div className="w-full max-w-3xl bg-white shadow-lg rounded-lg p-6">
+        {/* Event Details Box */}
+        <div className="border-b pb-4 mb-4">
+          <h1 className="text-3xl font-bold text-gray-800 text-center">{event.title}</h1>
+          <p className="text-gray-600 text-center mt-2">{event.description}</p>
+        </div>
 
-      {/* QR Code Display */}
-      <div className="mt-6 p-4 border border-gray-300 rounded">
-        <p className="text-lg font-semibold">Your QR Code</p>
-        <QRCodeCanvas value={JSON.stringify({ attendee_id: attendeeId, event_id: eventId })} size={200} />
+        {/* Event Info Box */}
+        <div className="bg-gray-50 p-4 rounded-md shadow">
+        <p className="text-lg">
+  📅 <strong>Date:</strong> {formatDate(event.date)}
+</p>
+<p className="text-lg">
+  🕒 <strong>Start Time:</strong> {convertToIST(event.start_time)}
+</p>
+<p className="text-lg">
+  ⏳ <strong>End Time:</strong> {convertToIST(event.end_time)}
+</p>
+<p className="text-lg">
+  🎁 <strong>Reward Points:</strong> {event.reward_points || "N/A"}
+</p>
+
+
+        </div>
+
+        {/* QR Code Box */}
+        <div className="mt-6 flex flex-col items-center bg-gray-50 p-4 rounded-md shadow">
+          <p className="text-lg font-semibold mb-2">Your QR Code</p>
+          <QRCodeCanvas value={JSON.stringify({ attendee_id: attendeeId, event_id: eventId })} size={200} />
+        </div>
+
+        {/* Buttons */}
+        <div className="mt-6 flex flex-col items-center gap-4">
+          {organizerId && (
+            <button
+              onClick={() => navigate(`/chat/${organizerId}/${eventId}/${attendeeId}`)}
+              className="w-full max-w-md px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-all"
+            >
+              Chat with Event Creator
+            </button>
+          )}
+
+          <button
+            onClick={() => setShowModal(true)}
+            className="w-full max-w-md px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-all"
+          >
+            Unregister from Event
+          </button>
+        </div>
       </div>
-
-      {/* Chat Button to navigate to chat page with event creator */}
-      {organizerId && (
-        <button
-          onClick={() => navigate(`/chat/${organizerId}/${eventId}/${attendeeId}`)}
-          className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-all"
-        >
-          Chat with Event Creator
-        </button>
-      )}
-
-      {/* Unregister Button */}
-      <button
-        onClick={() => setShowModal(true)}
-        className="mt-6 px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-all"
-      >
-        Unregister from Event
-      </button>
 
       {/* Confirmation Modal */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-md text-center">
+          <div className="bg-white p-6 rounded-md text-center shadow-lg">
             <p className="text-lg font-semibold">Are you sure you want to unregister from "{event.title}"?</p>
             <div className="flex justify-center gap-4 mt-4">
               <button
