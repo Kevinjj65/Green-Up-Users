@@ -1,19 +1,25 @@
-import { useState } from "react";
-import { supabase } from "../../../services/supabaseClient";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "../../../services/supabaseClient"; // Adjust path if needed
 
 const Signup = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
     password: "",
     confirmPassword: "",
-    name: "",
     phone: "",
-    role: "user",
+    role: "organizer",
   });
 
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const [agreed, setAgreed] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,9 +36,9 @@ const Signup = () => {
     }
 
     setLoading(true);
-
     const { email, password, name, phone, role } = formData;
 
+    // Sign up user with Supabase Auth
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -45,39 +51,18 @@ const Signup = () => {
       setError(error.message);
     } else {
       alert("Signup successful! Check your email to verify your account.");
+      if (role === "organizer" && data.user) {
+        const { error: insertError } = await supabase.from("organizers").insert([
+          {
+            id: data.user.id,
+            name,
+            email_id: email,
+            phone_number: phone,
+          },
+        ]);
 
-      if (data.user) {
-        // Request location access
-        if ("geolocation" in navigator) {
-          navigator.geolocation.getCurrentPosition(
-            async (position) => {
-              const latitude = position.coords.latitude;
-              const longitude = position.coords.longitude;
-
-              // Insert user details into participants table
-              const { error: insertError } = await supabase.from("participants").insert([
-                {
-                  id: data.user.id,
-                  name,
-                  email_id: email,
-                  phone_number: phone,
-                  latitude,
-                  longitude,
-                },
-              ]);
-
-              if (insertError) {
-                console.error("Error inserting participant:", insertError);
-              } else {
-                alert("Location saved successfully!");
-              }
-            },
-            (error) => {
-              console.error("Error getting location:", error.message);
-            }
-          );
-        } else {
-          console.error("Geolocation is not supported by this browser.");
+        if (insertError) {
+          console.error("Error inserting organizer:", insertError);
         }
       }
     }
@@ -87,49 +72,54 @@ const Signup = () => {
 
   return (
     <form onSubmit={handleSubmit} className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4 text-center">Sign Up</h2>
+      <h2 className="text-2xl font-bold mb-4 text-center">Be an Organizer Now!</h2>
 
       <input
         type="text"
+        name="name"
         placeholder="Name"
         value={formData.name}
-        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+        onChange={handleChange}
         required
         className="w-full p-2 mb-2 border rounded"
       />
       
       <input
         type="email"
+        name="email"
         placeholder="Email"
         value={formData.email}
-        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+        onChange={handleChange}
         required
         className="w-full p-2 mb-2 border rounded"
       />
       
       <input
         type="password"
+        name="password"
         placeholder="Password"
         value={formData.password}
-        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+        onChange={handleChange}
         required
         className="w-full p-2 mb-2 border rounded"
       />
 
       <input
         type="password"
+        name="confirmPassword"
         placeholder="Confirm Password"
         value={formData.confirmPassword}
-        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+        onChange={handleChange}
         required
         className="w-full p-2 mb-2 border rounded"
       />
 
       <input
-        type="text"
+        type="tel"
+        name="phone"
         placeholder="Phone Number"
         value={formData.phone}
-        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+        onChange={handleChange}
         required
         className="w-full p-2 mb-2 border rounded"
       />
@@ -148,6 +138,13 @@ const Signup = () => {
       >
         {loading ? "Signing up..." : "Sign Up"}
       </button>
+
+      <p className="mt-2 text-center">
+        Already a Member? <span className="text-blue-600 cursor-pointer" onClick={() => navigate("/organizerlogin")}><u>Click Here</u></span>
+      </p>
+      <p className="mt-1 text-center">
+        Are you a Volunteer? <span className="text-blue-600 cursor-pointer" onClick={() => navigate("/userlogin")}><u>Click Here</u></span>
+      </p>
     </form>
   );
 };
