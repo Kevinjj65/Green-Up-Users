@@ -39,7 +39,7 @@ const Signup = () => {
     const { email, password, name, phone, role } = formData;
 
     // Sign up user with Supabase Auth
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -47,11 +47,12 @@ const Signup = () => {
       },
     });
 
-    if (error) {
-      setError(error.message);
+    if (signUpError) {
+      setError(signUpError.message);
     } else {
       alert("Signup successful! Check your email to verify your account.");
-      if (role === "organizer" && data.user) {
+      
+      if (data.user) {
         const { error: insertError } = await supabase.from("organizers").insert([
           {
             id: data.user.id,

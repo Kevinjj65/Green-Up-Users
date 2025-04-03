@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { supabase } from "../../../services/supabaseClient.jsx"; // Adjust path if needed
+import { supabase } from "../../../services/supabaseClient.jsx";
 import Footer from "../Footer/Footer";
-import { data, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function UserProfile() {
   const [user, setUser] = useState(null);
@@ -14,7 +14,6 @@ function UserProfile() {
       setLoading(true);
       setError("");
 
-      // Get authenticated user
       const { data: authUser, error: authError } = await supabase.auth.getUser();
 
       if (authError || !authUser?.user) {
@@ -24,18 +23,17 @@ function UserProfile() {
       }
 
       const userId = authUser.user.id;
-      
-      // Fetch user details from 'participants' table
+
+      // Fetch user details
       const { data: userData, error: userError } = await supabase
         .from("participants")
         .select("name, email_id, phone_number, reward_points")
         .eq("id", userId)
         .single();
-      
+
       if (userError) {
         setError("Failed to fetch user data.");
       } else {
-        
         setUser(userData);
       }
 
@@ -45,46 +43,35 @@ function UserProfile() {
     fetchUserProfile();
   }, []);
 
-  // Logout function
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    navigate('/');
-    window.location.reload(); // Refresh page after logout
+    navigate("/");
+    window.location.reload();
   };
 
-  // Navigate to reward points page
+  // Navigate to Reward Points Page
   const handlePointsClick = () => {
     if (user) {
-      
-      navigate("/rewardpoints"); // Ensure user ID is passed
-    } else {
-      console.error("User ID is undefined.");
+      navigate(`/rewardpoints`);
     }
   };
-  
 
   return (
     <div className="w-screen min-h-screen bg-[#1E1E1E] text-white flex flex-col items-center justify-between pb-20">
-      {/* Main Content */}
       <div className="flex flex-col items-center justify-center w-[60vw] min-h-[70vh] space-y-8">
-        {/* Profile Circle */}
         <div className="w-24 h-24 bg-[#2A2A2A] rounded-full border-2 border-white flex justify-center items-center">
           <p>Profile</p>
         </div>
-
-        {/* Divider */}
         <div className="relative w-full">
           <div className="w-full h-[2px] bg-white border border-white rounded-md"></div>
         </div>
 
-        {/* Display Loading or Error */}
         {loading ? (
           <p className="text-gray-400">Loading profile...</p>
         ) : error ? (
           <p className="text-red-400">{error}</p>
         ) : (
           <div className="flex flex-col w-full space-y-4">
-            {/* Name */}
             <div className="relative flex items-center w-full">
               <p className="text-sm text-gray-400 w-[25%] ml-[5%]">Name</p>
               <div className="absolute bottom-[-2px] left-[30%] h-6 w-[2px] bg-white border border-white"></div>
@@ -92,7 +79,6 @@ function UserProfile() {
             </div>
             <div className="w-full h-[2px] bg-white border border-white rounded-md"></div>
 
-            {/* Email */}
             <div className="relative flex items-center w-full">
               <p className="text-sm text-gray-400 w-[25%] ml-[5%]">Email</p>
               <div className="absolute bottom-[-2px] left-[30%] h-6 w-[2px] bg-white border border-white"></div>
@@ -100,7 +86,6 @@ function UserProfile() {
             </div>
             <div className="w-full h-[2px] bg-white border border-white rounded-md"></div>
 
-            {/* Phone */}
             <div className="relative flex items-center w-full">
               <p className="text-sm text-gray-400 w-[25%] ml-[5%]">Phone</p>
               <div className="absolute bottom-[-2px] left-[30%] h-6 w-[2px] bg-white border border-white"></div>
@@ -108,18 +93,20 @@ function UserProfile() {
             </div>
             <div className="w-full h-[2px] bg-white border border-white rounded-md"></div>
 
-            {/* Current Points Section */}
+            {/* Reward Points Section */}
             <div className="flex flex-col items-center w-full mt-6">
               <h2 className="text-lg font-semibold text-white">Current Points</h2>
-              <div className="w-16 h-16 flex items-center justify-center bg-gray-700 text-white text-2xl font-bold rounded-md mt-2" onClick={handlePointsClick}>
-                <p className="text-md text-gray-300 ml-[10%]">{user?.reward_points || "N/A"}</p>
+              <div 
+                className="w-16 h-16 flex items-center justify-center bg-gray-700 text-white text-2xl font-bold rounded-md mt-2 cursor-pointer hover:bg-gray-600"
+                onClick={handlePointsClick}
+              >
+                {user?.reward_points || "0"}
               </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* Logout Button */}
       <div className="w-full flex justify-center mt-6">
         <button
           onClick={handleLogout}
@@ -130,7 +117,6 @@ function UserProfile() {
         </button>
       </div>
 
-      {/* Footer */}
       <div className="w-full">
         <Footer />
       </div>

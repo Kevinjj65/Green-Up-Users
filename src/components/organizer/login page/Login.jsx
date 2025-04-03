@@ -59,15 +59,12 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#1e1e1e]">
-      {/* Background Image */}
       <div className="w-full h-1/2 flex items-center justify-center">
         <img src={bgimg} alt="Login Illustration" className="w-full h-full object-cover" />
       </div>
 
-      {/* Login Form */}
       <div className="bg-[#1e1e1e] flex flex-col items-center justify-center h-1/2 px-6">
         <div className="w-full max-w-md">
-          {/* Corrected spacing for "Welcome Back!" */}
           <h2 className="text-2xl font-bold text-[#f5f5f5] text-center mt-8 mb-6">Welcome Back Organizer!</h2>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
