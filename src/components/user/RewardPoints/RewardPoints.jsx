@@ -21,7 +21,6 @@ function RewardPoints() {
       setLoading(true);
       setError("");
 
-      // Fetch event_id and points_awarded for the given attendee_id
       const { data: registrationsData, error: registrationsError } = await supabase
         .from("registrations")
         .select("event_id, points_awarded")
@@ -40,7 +39,6 @@ function RewardPoints() {
         return;
       }
 
-      // Fetch event details including sponsor_id
       const eventIds = registrationsData.map((entry) => entry.event_id);
       const { data: eventsData, error: eventsError } = await supabase
         .from("events")
@@ -53,13 +51,12 @@ function RewardPoints() {
         return;
       }
 
-      // Fetch sponsor names (using 'name' column from sponsors table)
       const sponsorIds = eventsData
         .map((event) => event.sponsor_id)
         .filter((id) => id !== null);
       const { data: sponsorsData, error: sponsorsError } = await supabase
         .from("sponsors")
-        .select("id, name") // Explicitly selecting 'name' column
+        .select("id, name")
         .in("id", sponsorIds);
 
       if (sponsorsError) {
@@ -68,13 +65,11 @@ function RewardPoints() {
         return;
       }
 
-      // Map sponsor names to their IDs
       const sponsorMap = sponsorsData.reduce((acc, sponsor) => {
-        acc[sponsor.id] = sponsor.name; // Using 'name' from sponsors table
+        acc[sponsor.id] = sponsor.name;
         return acc;
       }, {});
 
-      // Map event names and sponsors to their event_ids
       const eventMap = eventsData.reduce((acc, event) => {
         acc[event.id] = {
           title: event.title,
@@ -83,7 +78,6 @@ function RewardPoints() {
         return acc;
       }, {});
 
-      // Merge event and sponsor data into registrations
       const enrichedRegistrations = registrationsData.map((entry) => ({
         ...entry,
         title: eventMap[entry.event_id]?.title || "Unknown Event",
@@ -99,6 +93,10 @@ function RewardPoints() {
 
   const handleBackClick = () => {
     navigate("/userprofile");
+  };
+
+  const handleEventClick = (eventId) => {
+    navigate(`/redeem/${eventId}/${attendee_id}`);
   };
 
   return (
@@ -124,14 +122,18 @@ function RewardPoints() {
             <h2 className="text-xl font-semibold mb-2">Events & Points</h2>
             <ul className="w-full space-y-2">
               {registrations.map((entry, index) => (
-                <li key={index} className="bg-gray-800 p-3 rounded-md">
+                <li 
+                  key={index} 
+                  className="bg-gray-800 p-3 rounded-md cursor-pointer hover:bg-gray-700"
+                  onClick={() => handleEventClick(entry.event_id)}
+                >
                   <div className="flex justify-between">
                     <p>🎟 Event: {entry.title}</p>
                     <p className="text-gray-300">Sponsor: {entry.sponsorName}</p>
                   </div>
                   <div className="flex justify-between">
                     <p>🏆 Points Awarded: {entry.points_awarded}</p>
-                    <p className="text-gray-300"></p> {/* Empty for alignment */}
+                    <p className="text-gray-300"></p>
                   </div>
                 </li>
               ))}
