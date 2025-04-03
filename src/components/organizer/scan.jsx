@@ -9,7 +9,6 @@ const QRScanner = ({ eventId }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(document.createElement("canvas"));
 
-  // Handle file upload for QR code scanning
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -39,19 +38,17 @@ const QRScanner = ({ eventId }) => {
     reader.readAsDataURL(file);
   };
 
-  // Start camera for QR scanning
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "environment" },
       });
-      setIsCameraActive(true); // Set this first to render the video element
+      setIsCameraActive(true);
     } catch (err) {
       setError("Failed to access camera: " + err.message);
     }
   };
 
-  // Effect to set the stream once the video element is ready
   useEffect(() => {
     if (isCameraActive && videoRef.current) {
       const startStream = async () => {
@@ -63,14 +60,13 @@ const QRScanner = ({ eventId }) => {
           requestAnimationFrame(scanCamera);
         } catch (err) {
           setError("Failed to access camera: " + err.message);
-          setIsCameraActive(false); // Reset if it fails
+          setIsCameraActive(false);
         }
       };
       startStream();
     }
   }, [isCameraActive]);
 
-  // Stop camera
   const stopCamera = () => {
     if (videoRef.current && videoRef.current.srcObject) {
       const stream = videoRef.current.srcObject;
@@ -81,7 +77,6 @@ const QRScanner = ({ eventId }) => {
     setIsCameraActive(false);
   };
 
-  // Scan QR code from camera feed
   const scanCamera = () => {
     if (!videoRef.current || !isCameraActive) return;
 
@@ -106,7 +101,6 @@ const QRScanner = ({ eventId }) => {
     requestAnimationFrame(scanCamera);
   };
 
-  // Process QR code data
   const processQRCode = (qrData) => {
     try {
       const scannedData = JSON.parse(qrData);
@@ -125,7 +119,6 @@ const QRScanner = ({ eventId }) => {
     }
   };
 
-  // Handle check-in/check-out
   const handleCheckInOut = async (attendeeId, eventId) => {
     if (!attendeeId || !eventId) {
       setError("Invalid QR Code: Missing attendeeId or eventId.");
@@ -133,52 +126,73 @@ const QRScanner = ({ eventId }) => {
     }
 
     try {
-      const { data, error } = await supabase
+      const { data: registration, error: regError } = await supabase
         .from("registrations")
-        .select("check_in_time, check_out_time")
+        .select("check_in_time, check_out_time, points_awarded")
         .eq("attendee_id", attendeeId)
         .eq("event_id", eventId)
         .single();
 
-      if (error) {
+      if (regError) {
         setError("Error fetching registration details.");
         return;
       }
 
       const currentTime = new Date().toISOString();
 
-      if (!data.check_in_time) {
-        // Check-in
+      if (!registration.check_in_time) {
         await supabase
           .from("registrations")
           .update({ check_in_time: currentTime })
           .eq("attendee_id", attendeeId)
           .eq("event_id", eventId);
+
         setScanResult((prev) => ({
           ...prev,
           check_in_time: currentTime,
         }));
-      } else if (data.check_in_time && !data.check_out_time) {
-        // Check-out
+
+      } else if (registration.check_in_time && !registration.check_out_time) {
+        const { data: eventData, error: eventError } = await supabase
+          .from("events")
+          .select("reward_points")
+          .eq("id", eventId)
+          .single();
+
+        if (eventError || !eventData) {
+          setError("Error retrieving reward points.");
+          return;
+        }
+
+        const maxPoints = eventData.reward_points;
+        const pointsAwarded = prompt(`Enter reward points (0 - ${maxPoints}):`, "0");
+
+        const parsedPoints = parseInt(pointsAwarded, 10);
+        if (isNaN(parsedPoints) || parsedPoints < 0 || parsedPoints > maxPoints) {
+          setError(`Invalid reward points. Enter a value between 0 and ${maxPoints}.`);
+          return;
+        }
+
         await supabase
           .from("registrations")
-          .update({ check_out_time: currentTime })
+          .update({ check_out_time: currentTime, points_awarded: parsedPoints })
           .eq("attendee_id", attendeeId)
           .eq("event_id", eventId);
+
         setScanResult((prev) => ({
           ...prev,
           check_out_time: currentTime,
+          points_awarded: parsedPoints,
         }));
-      } else if (data.check_in_time && data.check_out_time) {
-        // Both check-in and check-out are already filled
-        setError("This user has checked in and out once already.");
+
+      } else if (registration.check_in_time && registration.check_out_time) {
+        setError("This user has already checked in and out.");
       }
     } catch (err) {
       setError("Database update failed.");
     }
   };
 
-  // Cleanup camera on unmount
   useEffect(() => {
     return () => stopCamera();
   }, []);
@@ -188,7 +202,6 @@ const QRScanner = ({ eventId }) => {
       <div className="w-full max-w-md flex flex-col items-center space-y-6 overflow-y-auto">
         <h2 className="text-xl font-semibold mt-4">QR Code Scanner</h2>
 
-        {/* File Upload for QR Code */}
         <input
           type="file"
           accept="image/*"
@@ -196,7 +209,6 @@ const QRScanner = ({ eventId }) => {
           className="my-4 w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
         />
 
-        {/* Camera Scanner Controls */}
         <div className="my-4">
           {!isCameraActive ? (
             <button
@@ -215,20 +227,10 @@ const QRScanner = ({ eventId }) => {
           )}
         </div>
 
-        {/* Video Feed for Camera */}
-        {isCameraActive && (
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            className="w-full max-w-md rounded-lg shadow-md"
-          />
-        )}
+        {isCameraActive && <video ref={videoRef} autoPlay playsInline className="w-full max-w-md rounded-lg shadow-md" />}
 
-        {/* Error or Success Message */}
         {error && <p className="text-red-500 text-center">{error}</p>}
 
-        {/* Display entire scanned QR code data */}
         {scanResult && (
           <div className="mt-4 w-full">
             <p className="font-semibold text-center">Scanned QR Code Data:</p>

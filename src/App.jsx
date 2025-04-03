@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./components/home/Home";
 import Events from "./components/events/Events";
 import Chat from "./components/Chat/Chat.jsx";
+import SplashScreen from "./components/SplashScreen/SplashScreen.jsx";
 
 // Organizer Components
 import AddNew from "./components/organizer/AddNew.jsx";
@@ -63,6 +64,7 @@ import RewardPoints from "./components/user/RewardPoints/RewardPoints.jsx";
           <Route path="/organizer/event/:eventId/chat" element={<OrganizerChatList />} />
           <Route path="/organizer/chat/:eventId/:attendeeId" element={<OrganizerChat />} />
           <Route path="/rewardpoints" element={<RewardPoints />} />
+          <Route path="/logo" element={<SplashScreen />} />
         </Routes>
       </BrowserRouter>
     </>

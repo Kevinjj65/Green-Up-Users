@@ -56,30 +56,35 @@ const Home = () => {
       if (!response.ok) throw new Error(`API error: ${response.statusText}`);
 
       const data = await response.json();
-      return data.results[0]?.formatted_address || "Unknown Location";
+      const fullAddress = data.results[0]?.formatted_address || "Unknown Location";
+
+      return formatLocation(fullAddress);
     } catch (error) {
       console.error("Error fetching address:", error.message);
       return "Unknown Location";
     }
   };
 
+  const formatLocation = (fullAddress) => {
+    const parts = fullAddress.split(", ");
+    if (parts.length >= 3) {
+      return parts.slice(-3).join(", "); // Get the last 3 parts (City, State, Country)
+    }
+    return fullAddress; // Fallback in case the address is short
+  };
+
   return (
-    <div className="w-screen h-screen bg-[#1e1e1e] text-[#39FF14] flex flex-col">
+    <div className="w-screen h-screen bg-[#1e1e1e] text-[#F5F5F5] flex flex-col">
       {/* Header - Fixed at the top */}
-      <header className="bg-[#1e1e1e] py-4 px-6 flex justify-between items-center border-b border-[#39FF14] sticky top-0 z-50">
-        <h1 className="text-2xl font-bold">GREEN UP</h1>
+      <header className="bg-[#1e1e1e] py-4 px-6 flex justify-end items-center sticky top-0 z-50">
         <button
           onClick={() => navigate("/userlogin")}
           style={{
-            backgroundColor: "#39FF14",
-            color: "#1e1e1e",
+            color: "#aed36c",
             fontWeight: "bold",
             width: "100px",
             height: "35px",
             fontSize: "14px",
-            borderRadius: "20px",
-            border: "1px solid #39FF14",
-            boxShadow: "0px 2px 4px rgba(57, 255, 20, 0.5)",
             cursor: "pointer",
             textAlign: "center",
             display: "flex",
@@ -93,15 +98,15 @@ const Home = () => {
 
       {/* Main Section - Enables Vertical Scrolling */}
       <main className="p-6 flex-1 overflow-y-auto">
-        <h2 className="text-3xl font-semibold mb-4">Nearby Events</h2>
+        <h2 className="text-3xl font-semibold mb-4">Events Near You</h2>
 
-        {/* Event Grid - 2 Cards Per Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-2">
+        {/* Event Grid - Always Two Events Per Row */}
+        <div className="grid grid-cols-2 gap-4 p-2">
           {events.length > 0 ? (
             events.map((event) => (
               <div
                 key={event.id}
-                className="bg-[#39FF14] text-[#1e1e1e] p-4 rounded-lg shadow-lg"
+                className="bg-[#1e1e1e] text-[#F5F5F5] p-4 rounded-lg shadow-lg w-full"
               >
                 <img
                   onClick={() => navigate("/userlogin")}

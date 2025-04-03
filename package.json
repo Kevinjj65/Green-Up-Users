@@ -15,6 +15,7 @@
     "@supabase/supabase-js": "^2.49.1",
     "@tailwindcss/vite": "^4.0.7",
     "autoprefixer": "^10.4.21",
+    "framer-motion": "^12.6.3",
     "green-up-users": "file:",
     "html5-qrcode": "^2.3.8",
     "jsqr": "^1.4.0",
