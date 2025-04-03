@@ -10,10 +10,7 @@ const AfterRegistration = () => {
   const [event, setEvent] = useState(null);
   const [eventAddress, setEventAddress] = useState("Fetching location...");
   const [organizerId, setOrganizerId] = useState(null);
-  const [eventDate, setEventDate] = useState(null);
-  const [startTime, setStartTime] = useState(null);
-  const [endTime, setEndTime] = useState(null);
-  const [rewardPoints, setRewardPoints] = useState(null); // ✅ Added reward points state
+  const [showModal, setShowModal] = useState(false); // Modal state
 
   console.log("Received eventId:", eventId, "attendeeId:", attendeeId);
 
@@ -30,18 +27,13 @@ const AfterRegistration = () => {
       try {
         const { data, error } = await supabase
           .from("events")
-          .select("title, description, latitude, longitude, organizer_id, date, start_time, end_time, reward_points") // ✅ Added reward_points
+          .select("title, description, date, start_time, end_time, reward_points, latitude, longitude, organizer_id")
           .eq("id", eventId)
           .single();
 
         if (error) throw error;
-
         setEvent(data);
         setOrganizerId(data.organizer_id);
-        setEventDate(data.date);
-        setStartTime(data.start_time);
-        setEndTime(data.end_time);
-        setRewardPoints(data.reward_points); // ✅ Store reward points
 
         if (data.latitude && data.longitude) {
           fetchAddressFromCoordinates(data.latitude, data.longitude);
@@ -82,6 +74,7 @@ const AfterRegistration = () => {
       setEventAddress("Error retrieving location");
     }
   }
+
   const formatDate = (dateStr) => {
     if (!dateStr) return "N/A";
     const date = new Date(dateStr);
@@ -130,39 +123,90 @@ const AfterRegistration = () => {
       alert("Error unregistering. Please try again.");
     }
   };
-  if (!event) return <p className="text-f5f5f5">Loading event details...</p>;
+
+  if (!event) return <p>Loading event details...</p>;
 
   return (
-    <div className="bg-[#1E1E1E] text-[#F5F5F5] min-h-screen flex flex-col items-center py-10">
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
       <button
         onClick={() => navigate("/events")}
-        className="self-start ml-4 px-4 py-2 bg-[#2A2A2A] text-white rounded-md hover:bg-gray-800 transition"
+        className="self-start mb-6 px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-800 transition"
       >
         ← Back to Events
       </button>
-      <h1 className="text-2xl font-bold mt-4">{event.title}</h1>
-      <p className="mt-2">{event.description}</p>
 
-      {/* QR Code Display */}
-      <div className="mt-6 p-4 border border-gray-500 rounded">
-        <p className="text-lg font-semibold">Your QR Code</p>
-        <QRCodeCanvas value={JSON.stringify({ attendee_id: attendeeId, event_id: eventId })} size={200} />
+      <div className="w-full max-w-3xl bg-white shadow-lg rounded-lg p-6">
+        {/* Event Details Box */}
+        <div className="border-b pb-4 mb-4">
+          <h1 className="text-3xl font-bold text-gray-800 text-center">{event.title}</h1>
+          <p className="text-gray-600 text-center mt-2">{event.description}</p>
+        </div>
+
+        {/* Event Info Box */}
+        <div className="bg-gray-50 p-4 rounded-md shadow">
+        <p className="text-lg">
+  📅 <strong>Date:</strong> {formatDate(event.date)}
+</p>
+<p className="text-lg">
+  🕒 <strong>Start Time:</strong> {convertToIST(event.start_time)}
+</p>
+<p className="text-lg">
+  ⏳ <strong>End Time:</strong> {convertToIST(event.end_time)}
+</p>
+<p className="text-lg">
+  🎁 <strong>Reward Points:</strong> {event.reward_points || "N/A"}
+</p>
+
+
+        </div>
+
+        {/* QR Code Box */}
+        <div className="mt-6 flex flex-col items-center bg-gray-50 p-4 rounded-md shadow">
+          <p className="text-lg font-semibold mb-2">Your QR Code</p>
+          <QRCodeCanvas value={JSON.stringify({ attendee_id: attendeeId, event_id: eventId })} size={200} />
+        </div>
+
+        {/* Buttons */}
+        <div className="mt-6 flex flex-col items-center gap-4">
+          {organizerId && (
+            <button
+              onClick={() => navigate(`/chat/${organizerId}/${eventId}/${attendeeId}`)}
+              className="w-full max-w-md px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-all"
+            >
+              Chat with Event Creator
+            </button>
+          )}
+
+          <button
+            onClick={() => setShowModal(true)}
+            className="w-full max-w-md px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-all"
+          >
+            Unregister from Event
+          </button>
+        </div>
       </div>
 
-      {/* Date, Time, Location, and Reward Points Below QR Code */}
-      <p className="mt-4">📅 Date: {eventDate || "N/A"}</p>
-      <p className="mt-1">⏰ Time: {startTime || "N/A"} - {endTime || "N/A"}</p>
-      <p className="mt-1">📍 {eventAddress}</p>
-      <p className="mt-1">🎁 Reward Points: {rewardPoints !== null ? rewardPoints : "N/A"}</p>
-
-      {/* Chat Button to navigate to chat page with event creator */}
-      {organizerId && (
-        <button
-          onClick={() => navigate(`/chat/${organizerId}/${eventId}/${attendeeId}`)}
-          className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-all"
-        >
-          Chat with Event Creator
-        </button>
+      {/* Confirmation Modal */}
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-md text-center shadow-lg">
+            <p className="text-lg font-semibold">Are you sure you want to unregister from "{event.title}"?</p>
+            <div className="flex justify-center gap-4 mt-4">
+              <button
+                onClick={handleUnregister}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-all"
+              >
+                Yes, Unregister
+              </button>
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500 transition-all"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       <Footer />
