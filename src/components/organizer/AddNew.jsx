@@ -40,16 +40,28 @@ function AddNew() {
             setLocationDebug("No address provided");
             return;
         }
-
+    
         try {
-            // Use the full address and add context if needed
-            const fullAddress = `${address}, Kochi, Kerala, India`; // Adding context
+            // Adding full address context to improve accuracy
+            const fullAddress = `${address}, Kochi, Kerala, India`;
             const encodedAddress = encodeURIComponent(fullAddress.trim());
+    
             const response = await fetch(
-                `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&limit=1`
+                `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&limit=1`,
+                {
+                    headers: {
+                        "User-Agent": "GreenUpApp/1.0 (contact@yourdomain.com)", // Replace with your actual email or domain
+                        "Accept-Language": "en"
+                    }
+                }
             );
+    
+            if (!response.ok) {
+                throw new Error(`HTTP Error: ${response.status}`);
+            }
+    
             const data = await response.json();
-
+    
             if (data.length > 0) {
                 const { lat, lon, display_name } = data[0];
                 setEventData((prev) => ({
@@ -63,9 +75,10 @@ function AddNew() {
             }
         } catch (error) {
             console.error("Error fetching coordinates:", error);
-            setLocationDebug("Error fetching coordinates");
+            setLocationDebug(`Error fetching coordinates: ${error.message}`);
         }
     };
+    
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
