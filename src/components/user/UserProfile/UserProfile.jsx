@@ -27,16 +27,46 @@ function UserProfile() {
       // Fetch user details
       const { data: userData, error: userError } = await supabase
         .from("participants")
-        .select("name, email_id, phone_number, reward_points")
+        .select("id, name, email_id, phone_number")
         .eq("id", userId)
         .single();
 
       if (userError) {
         setError("Failed to fetch user data.");
-      } else {
-        setUser(userData);
+        setLoading(false);
+        return;
       }
 
+      // Fetch reward points by summing up points_awarded from the registrations table
+      const { data: pointsData, error: pointsError } = await supabase
+        .from("registrations")
+        .select("points_awarded")
+        .eq("attendee_id", userId);
+
+      let totalPoints = 0;
+      if (pointsData) {
+        totalPoints = pointsData.reduce((sum, entry) => sum + (entry.points_awarded || 0), 0);
+      }
+
+      if (pointsError) {
+        setError("Failed to fetch reward points.");
+        setLoading(false);
+        return;
+      }
+
+      // Update reward points in participants table
+      const { error: updateError } = await supabase
+        .from("participants")
+        .update({ reward_points: totalPoints })
+        .eq("id", userId);
+
+      if (updateError) {
+        setError("Failed to update reward points.");
+        setLoading(false);
+        return;
+      }
+
+      setUser({ id: userId, ...userData, reward_points: totalPoints });
       setLoading(false);
     };
 
@@ -49,10 +79,12 @@ function UserProfile() {
     window.location.reload();
   };
 
-  // Navigate to Reward Points Page
+  // Navigate to Reward Points Page with attendee_id
   const handlePointsClick = () => {
-    if (user) {
-      navigate(`/rewardpoints`);
+    if (user?.id) {
+      navigate(`/rewardpoints/${user.id}`);
+    } else {
+      console.error("User ID is undefined!");
     }
   };
 
