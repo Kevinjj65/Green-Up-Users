@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react"; // Added useRef
 import { supabase } from "./../../services/supabaseClient";
 import OrganizerFooter from "./OrganizerFooter";
 
@@ -21,6 +21,7 @@ function AddNew() {
     const [uploadStatus, setUploadStatus] = useState("");
     const [selectedFile, setSelectedFile] = useState(null);
     const [locationDebug, setLocationDebug] = useState(""); // Debug info
+    const fileInputRef = useRef(null); // Ref for the file input
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -82,22 +83,25 @@ function AddNew() {
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
-        setSelectedFile(file);
-        setUploadStatus(`File selected: ${file.name}`);
+        if (file) {
+            setSelectedFile(file);
+            setUploadStatus(`File selected: ${file.name}`);
+            handleUpload(file); // Automatically trigger upload after file selection
+        }
     };
 
-    const handleUpload = async () => {
-        if (!selectedFile) {
+    const handleUpload = async (file) => {
+        if (!file) {
             setUploadStatus("No file selected.");
             return;
         }
 
         setUploadStatus("Uploading...");
-        const fileName = `${Date.now()}_${selectedFile.name}`;
+        const fileName = `${Date.now()}_${file.name}`;
 
         const { data, error } = await supabase.storage
             .from("event_images")
-            .upload(fileName, selectedFile);
+            .upload(fileName, file);
 
         if (error) {
             setUploadStatus("Error uploading file.");
@@ -114,6 +118,10 @@ function AddNew() {
         }));
 
         setUploadStatus("Upload successful!");
+    };
+
+    const handleButtonClick = () => {
+        fileInputRef.current.click(); // Programmatically trigger file input click
     };
 
     const handleSubmit = async (e) => {
@@ -159,7 +167,6 @@ function AddNew() {
                     reward_points: Number(eventData.reward_points),
                     images: eventData.image_url,
                     organizer_id: organizerId,
-                    
                 }
             ]);
 
@@ -169,12 +176,13 @@ function AddNew() {
             alert("Error adding event: " + error.message);
         } else {
             alert("Event added successfully!");
+            window.location.reload(); // Refresh the page after successful registration
         }
     };
 
     return (
         <div className="flex flex-col min-h-screen bg-gray-900 text-gray-100 font-light">
-            <main className="p-10 flex-1">
+            <main className="p-10 flex-1 mb-20">
                 <h1 className="text-lg mb-7">Be an Organizer Now</h1>
                 <form onSubmit={handleSubmit}>
                     <input
@@ -243,15 +251,22 @@ function AddNew() {
                         required
                     />
 
-                    <input type="file" className="mb-4" onChange={handleFileChange} />
+                    {/* Hidden file input */}
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        className="hidden"
+                        onChange={handleFileChange}
+                    />
+                    {/* Combined Upload Image button */}
                     <button
                         type="button"
-                        className="bg-blue-500 px-4 py-2 rounded text-white"
-                        onClick={handleUpload}
+                        className="bg-blue-500 px-4 py-2 rounded text-white mb-4"
+                        onClick={handleButtonClick}
                     >
                         Upload Image
                     </button>
-                    {uploadStatus && <p>{uploadStatus}</p>}
+                    {uploadStatus && <p className="mb-4">{uploadStatus}</p>}
 
                     <div className="flex items-center py-5">
                         <input className="mr-2" type="checkbox" required />
