@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import jsQR from "jsqr";
 import { supabase } from "./../../services/supabaseClient";
+import RewardPointsModal from "../ui/RewardPointsModal"; // Import the modal
 
 const QRScanner = ({ eventId }) => {
   const [scanResult, setScanResult] = useState(null);
   const [error, setError] = useState(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
+  const [isRewardModalOpen, setIsRewardModalOpen] = useState(false); // State for reward points modal
+  const [maxPoints, setMaxPoints] = useState(0); // State to store max reward points
   const videoRef = useRef(null);
   const canvasRef = useRef(document.createElement("canvas"));
 
@@ -151,7 +154,6 @@ const QRScanner = ({ eventId }) => {
           ...prev,
           check_in_time: currentTime,
         }));
-
       } else if (registration.check_in_time && !registration.check_out_time) {
         const { data: eventData, error: eventError } = await supabase
           .from("events")
@@ -164,72 +166,74 @@ const QRScanner = ({ eventId }) => {
           return;
         }
 
-        const maxPoints = eventData.reward_points;
-        const pointsAwarded = prompt(`Enter reward points (0 - ${maxPoints}):`, "0");
-
-        const parsedPoints = parseInt(pointsAwarded, 10);
-        if (isNaN(parsedPoints) || parsedPoints < 0 || parsedPoints > maxPoints) {
-          setError(`Invalid reward points. Enter a value between 0 and ${maxPoints}.`);
-          return;
-        }
-
-        // Update registrations table
-        const { error: regUpdateError } = await supabase
-          .from("registrations")
-          .update({ check_out_time: currentTime, points_awarded: parsedPoints })
-          .eq("attendee_id", attendeeId)
-          .eq("event_id", eventId);
-
-        if (regUpdateError) {
-          setError(`Error updating registrations: ${regUpdateError.message}`);
-          return;
-        }
-
-        // Fetch current reward_points from participants table
-        const { data: participantData, error: participantError } = await supabase
-          .from("participants")
-          .select("reward_points")
-          .eq("id", attendeeId)
-          .single();
-
-        if (participantError) {
-          setError(`Error fetching participant's reward points: ${participantError.message}`);
-          return;
-        }
-
-        // Calculate new total reward points
-        const currentRewardPoints = participantData.reward_points || 0; // Default to 0 if null
-        const newTotalPoints = currentRewardPoints + parsedPoints;
-
-        console.log(`Updating participant ${attendeeId}: Current Points: ${currentRewardPoints}, New Points: ${parsedPoints}, Total: ${newTotalPoints}`);
-
-        // Update participants table with new total
-        const { data: updatedParticipant, error: updateError } = await supabase
-          .from("participants")
-          .update({ reward_points: newTotalPoints })
-          .eq("id", attendeeId)
-          .select(); // Return the updated row for verification
-
-        if (updateError) {
-          setError(`Error updating participant's reward points: ${updateError.message}`);
-          console.error("Update error details:", updateError);
-          return;
-        }
-
-        console.log("Successfully updated participant:", updatedParticipant);
-
-        setScanResult((prev) => ({
-          
-          check_out_time: currentTime,
-          points_awarded: parsedPoints,
-        }));
-
+        setMaxPoints(eventData.reward_points); // Store max points for the modal
+        setIsRewardModalOpen(true); // Open the modal instead of prompt
       } else if (registration.check_in_time && registration.check_out_time) {
         setError("This user has already checked in and out.");
       }
     } catch (err) {
       setError(`Database update failed: ${err.message}`);
       console.error("Unexpected error:", err);
+    }
+  };
+
+  const handleRewardPointsSubmit = async (pointsAwarded) => {
+    try {
+      const currentTime = new Date().toISOString();
+
+      // Update registrations table
+      const { error: regUpdateError } = await supabase
+        .from("registrations")
+        .update({ check_out_time: currentTime, points_awarded: pointsAwarded })
+        .eq("attendee_id", scanResult.attendee_id)
+        .eq("event_id", eventId);
+
+      if (regUpdateError) {
+        setError(`Error updating registrations: ${regUpdateError.message}`);
+        return;
+      }
+
+      // Fetch current reward_points from participants table
+      const { data: participantData, error: participantError } = await supabase
+        .from("participants")
+        .select("reward_points")
+        .eq("id", scanResult.attendee_id)
+        .single();
+
+      if (participantError) {
+        setError(`Error fetching participant's reward points: ${participantError.message}`);
+        return;
+      }
+
+      // Calculate new total reward points
+      const currentRewardPoints = participantData.reward_points || 0; // Default to 0 if null
+      const newTotalPoints = currentRewardPoints + pointsAwarded;
+
+      console.log(`Updating participant ${scanResult.attendee_id}: Current Points: ${currentRewardPoints}, New Points: ${pointsAwarded}, Total: ${newTotalPoints}`);
+
+      // Update participants table with new total
+      const { data: updatedParticipant, error: updateError } = await supabase
+        .from("participants")
+        .update({ reward_points: newTotalPoints })
+        .eq("id", scanResult.attendee_id)
+        .select(); // Return the updated row for verification
+
+      if (updateError) {
+        setError(`Error updating participant's reward points: ${updateError.message}`);
+        console.error("Update error details:", updateError);
+        return;
+      }
+
+      console.log("Successfully updated participant:", updatedParticipant);
+
+      setScanResult((prev) => ({
+        ...prev,
+        check_out_time: currentTime,
+        points_awarded: pointsAwarded,
+      }));
+      setIsRewardModalOpen(false); // Close the modal after submission
+    } catch (err) {
+      setError(`Failed to update check-out details: ${err.message}`);
     }
   };
 
@@ -280,6 +284,14 @@ const QRScanner = ({ eventId }) => {
           </div>
         )}
       </div>
+
+      {/* Add the RewardPointsModal */}
+      <RewardPointsModal
+        isOpen={isRewardModalOpen}
+        onClose={() => setIsRewardModalOpen(false)}
+        onSubmit={handleRewardPointsSubmit}
+        maxPoints={maxPoints}
+      />
     </div>
   );
 };
