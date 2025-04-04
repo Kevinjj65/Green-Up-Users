@@ -276,13 +276,21 @@ const QRScanner = ({ eventId }) => {
         {error && <p className="text-red-500 text-center">{error}</p>}
 
         {scanResult && (
-          <div className="mt-4 w-full">
-            <p className="font-semibold text-center">Scanned QR Code Data:</p>
-            <pre className="bg-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
-              {JSON.stringify(scanResult, null, 2)}
-            </pre>
-          </div>
-        )}
+  <div className="mt-4 w-full text-center">
+    {scanResult.check_in_time && !scanResult.check_out_time && (
+      <p className="text-green-600 font-semibold text-lg">✅ Checked In</p>
+    )}
+    {scanResult.check_out_time && (
+      <>
+        <p className="text-blue-600 font-semibold text-lg">✅ Checked Out</p>
+        <p className="text-gray-700 text-sm mt-1">
+          Reward Points Awarded: <span className="font-bold">{scanResult.points_awarded}</span>
+        </p>
+      </>
+    )}
+  </div>
+)}
+
       </div>
 
       {/* Add the RewardPointsModal */}
