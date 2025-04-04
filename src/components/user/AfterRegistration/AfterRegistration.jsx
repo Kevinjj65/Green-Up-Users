@@ -127,7 +127,8 @@ const AfterRegistration = () => {
   if (!event) return <p>Loading event details...</p>;
 
   return (
-    <div className="h-screen w-screen overflow-hidden flex flex-col items-center justify-between p-4">
+    <div className="min-h-screen w-screen overflow-x-hidden flex flex-col items-center justify-between p-4 pb-24">
+
 
       <button
         onClick={() => navigate("/events")}
