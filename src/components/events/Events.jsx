@@ -150,7 +150,7 @@ const Events = () => {
       {/* Sticky Header with Updated Background */}
       <header className="bg-[#1e1e1e] py-4 px-6 flex items-center justify-between text-white sticky top-0 left-0 right-0 z-10 h-16">
         <h1 className="text-xl font-bold truncate flex-1">
-          All Events
+        Nearby Events
         </h1>
 
         <button
