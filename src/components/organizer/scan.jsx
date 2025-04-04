@@ -219,7 +219,7 @@ const QRScanner = ({ eventId }) => {
         console.log("Successfully updated participant:", updatedParticipant);
 
         setScanResult((prev) => ({
-          ...prev,
+          
           check_out_time: currentTime,
           points_awarded: parsedPoints,
         }));

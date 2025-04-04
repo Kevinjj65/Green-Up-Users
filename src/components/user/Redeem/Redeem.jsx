@@ -195,8 +195,7 @@ function Redeem() {
           </button>
 
           <h1 className="text-2xl font-bold mb-4">Redeem Points</h1>
-          <p className="text-lg">Event ID: {event_id}</p>
-          <p className="text-lg">Attendee ID: {attendee_id}</p>
+          
 
           {loading ? (
             <p className="text-gray-400 mt-4">Loading...</p>
