@@ -117,15 +117,7 @@ const OrganizerProfile = () => {
           className="w-full p-2 border rounded-md bg-gray-800 text-white disabled:opacity-50"
           placeholder="Phone Number"
         />
-        <input
-          type="text"
-          name="fee_payment"
-          value={profile.fee_payment}
-          onChange={handleChange}
-          disabled={!editMode}
-          className="w-full p-2 border rounded-md bg-gray-800 text-white disabled:opacity-50"
-          placeholder="Fee Payment Status"
-        />
+      
       </div>
 
       {editMode && (
