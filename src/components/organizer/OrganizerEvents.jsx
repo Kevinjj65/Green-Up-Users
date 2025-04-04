@@ -64,12 +64,7 @@ const OrganizerEvents = () => {
       {/* ✅ Header Section with Navigation Button */}
       <div className="flex justify-between items-center px-6 py-4 bg-white shadow-md">
         <h1 className="text-2xl font-bold text-gray-900">My Events</h1>
-        <button
-          onClick={() => navigate("/orgmaps")}
-          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-all"
-        >
-          View Map
-        </button>
+       
       </div>
 
       {loading && <p className="text-center text-gray-600">Loading events...</p>}
