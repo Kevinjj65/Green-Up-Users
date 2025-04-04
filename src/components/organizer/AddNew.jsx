@@ -193,13 +193,18 @@ function AddNew() {
                         onChange={handleChange}
                         required
                     />
-                    <textarea
-                        className="bg-gray-200 text-gray-900 w-full rounded px-3 h-[37px] text-xs mb-6"
-                        name="description"
-                        placeholder="Event Description"
-                        onChange={handleChange}
-                        required
-                    />
+<textarea
+    className="bg-gray-200 text-gray-900 w-full rounded px-3 py-[6px] text-xs mb-6 h-[37px] leading-[32px]"
+    name="description"
+    placeholder="Event Description"
+    onChange={handleChange}
+    required
+/>
+
+
+
+
+                    <label className="text-xs text-gray-300 block mb-1">Date</label>  {/* ✅ Added title */}
                     <input
                         className="bg-gray-200 text-gray-900 w-full rounded px-3 h-[37px] text-xs mb-6"
                         type="date"
@@ -208,21 +213,29 @@ function AddNew() {
                         required
                     />
                     <div className="flex justify-between">
-                        <input
-                            className="bg-gray-200 text-gray-900 w-[48%] rounded px-3 h-[37px] text-xs mb-6"
-                            type="time"
-                            name="start_time"
-                            onChange={handleChange}
-                            required
-                        />
-                        <input
-                            className="bg-gray-200 text-gray-900 w-[48%] rounded px-3 h-[37px] text-xs mb-6"
-                            type="time"
-                            name="end_time"
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
+                    <div className="mb-6">
+                            <label className="text-xs text-gray-300 block mb-1">Start Time</label>  {/* ✅ Added title */}
+                            <input
+                                className="bg-gray-200 text-gray-900 w-full rounded px-3 h-[37px] text-xs"
+                                type="time"
+                                name="start_time"
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+
+                        <div className="mb-6">
+                            <label className="text-xs text-gray-300 block mb-1">End Time</label>  {/* ✅ Added title */}
+                            <input
+                                className="bg-gray-200 text-gray-900 w-full rounded px-3 h-[37px] text-xs"
+                                type="time"
+                                name="end_time"
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                        </div>
+
 
                     <input
                         className="bg-gray-200 text-gray-900 w-full rounded px-3 h-[37px] text-xs mb-6"
